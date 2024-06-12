@@ -5,7 +5,7 @@ import subprocess
 import os
 from zlib import adler32
 
-class ReadWriteTest(BaseTest, PerformanceTest):
+class ReadWriteTest(BaseTest):
     def __init__(self):
         super().__init__()
         self.stdout = None
