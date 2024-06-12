@@ -5,7 +5,7 @@ from BaseTest import BaseTest
 from ReadWriteTest import ReadWriteTest
 
 copyTest = ReadWriteTest()
-copyTest.setup('xrdcp', '~/tst.txt', 'dteam:/test/tst.txt', '--force')
+copyTest.setup('xrdcp', './tst.txt', 'dteam:/test/tst.txt', '--force')
 
 copyTest.subprocess()
 
