@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from BaseTest import BaseTest
-from PerformanceTest import PerformanceTest
+#from PerformanceTest import PerformanceTest
 import subprocess
 import os
 from zlib import adler32
