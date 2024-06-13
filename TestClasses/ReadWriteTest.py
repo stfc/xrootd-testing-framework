@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 from BaseTest import BaseTest
-#from PerformanceTest import PerformanceTest
+from PerformanceTest import PerformanceTest
 import subprocess
 import os
 from zlib import adler32
 
-class ReadWriteTest(BaseTest):
+class ReadWriteTest(BaseTest, PerformanceTest):
     def __init__(self):
         super().__init__()
         self.stdout = None
@@ -49,7 +49,7 @@ class ReadWriteTest(BaseTest):
                 
 
                     # pretty printing is on by default but can be disabled using prettyprint=False
-                    with open('output.xml', 'w') as f:
+                    with open('../Results/output.xml', 'w') as f:
                         TestSuite.to_file(f, [ts], prettyprint=True)
 
                     #subprocess.run(['ls', os.path.expanduser('../..')])
