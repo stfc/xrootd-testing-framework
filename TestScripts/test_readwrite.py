@@ -17,7 +17,7 @@ def test_xrdcp_upload():
 def test_xrd_checksums():
 
     checksumTest = ReadWriteTest()
-    source = checksumTest.xrdadler32('~/tst.txt')
+    source = checksumTest.xrdadler32('../TestData/tst2.txt')
     dest = checksumTest.xrdadler32('root://ceph-svc16.gridpp.rl.ac.uk:1094//dteam:/test/tst.txt')
 
     assert dest == source, f"Source file checksum {source} does not match destination file checksum {dest}"

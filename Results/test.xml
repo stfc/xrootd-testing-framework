@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="2.930" timestamp="2024-06-14T15:14:36.921057" hostname="host-172-16-105-161"><testcase classname="test_readwrite" name="test_xrdcp_upload" time="1.152" /><testcase classname="test_readwrite" name="test_xrd_checksums" time="0.257"><failure message="AssertionError: Source file checksum 390c064b does not match destination file checksum 32c10641&#10;assert '32c10641' == '390c064b'&#10;  &#10;  - 390c064b&#10;  + 32c10641">def test_xrd_checksums():
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="1.404" timestamp="2024-06-14T15:28:45.220457" hostname="host-172-16-105-161"><testcase classname="test_readwrite" name="test_xrdcp_upload" time="1.180" /><testcase classname="test_readwrite" name="test_xrd_checksums" time="0.163"><failure message="AssertionError: Source file checksum 250e055f does not match destination file checksum 32c10641&#10;assert '32c10641' == '250e055f'&#10;  &#10;  - 250e055f&#10;  + 32c10641">def test_xrd_checksums():
     
         checksumTest = ReadWriteTest()
-        source = checksumTest.xrdadler32('~/tst.txt')
+        source = checksumTest.xrdadler32('../TestData/tst2.txt')
         dest = checksumTest.xrdadler32('root://ceph-svc16.gridpp.rl.ac.uk:1094//dteam:/test/tst.txt')
     
 &gt;       assert dest == source, f"Source file checksum {source} does not match destination file checksum {dest}"
-E       AssertionError: Source file checksum 390c064b does not match destination file checksum 32c10641
-E       assert '32c10641' == '390c064b'
+E       AssertionError: Source file checksum 250e055f does not match destination file checksum 32c10641
+E       assert '32c10641' == '250e055f'
 E         
-E         - 390c064b
+E         - 250e055f
 E         + 32c10641
 
 test_readwrite.py:23: AssertionError</failure></testcase></testsuite></testsuites>
