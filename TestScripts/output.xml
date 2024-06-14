@@ -3,7 +3,7 @@
 	<testsuite disabled="0" errors="0" failures="1" name="my test suite" skipped="0" tests="1" time="123.345">
 		<testcase name="CopyTest" time="123.345000" classname="ReadWriteTest">
 			<failure type="failure" message="FAIL"/>
-			<system-out>Copying 16 bytes file:///home/efv97572/tst.txt =&gt; https://ceph-svc16.gridpp.rl.ac.uk:1094//dteam:/test/tst.txt
+			<system-out>Copying 16 bytes file:///home/efv97572/xrd-tests/TestScripts/tst.txt =&gt; https://ceph-svc16.gridpp.rl.ac.uk:1094//dteam:/test/tst.txt
 </system-out>
 		</testcase>
 	</testsuite>

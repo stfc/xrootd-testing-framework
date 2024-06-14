@@ -1,14 +1,10 @@
 <?xml version="1.0" ?>
-<testsuites disabled="0" errors="1" failures="1" tests="1" time="123.345">
-	<testsuite disabled="0" errors="1" failures="1" name="my test suite" skipped="0" tests="1" time="123.345">
+<testsuites disabled="0" errors="0" failures="1" tests="1" time="123.345">
+	<testsuite disabled="0" errors="0" failures="1" name="my test suite" skipped="0" tests="1" time="123.345">
 		<testcase name="CopyTest" time="123.345000" classname="ReadWriteTest">
 			<failure type="failure" message="FAIL"/>
-			<error type="error" message="gfal-copy error: 1 (Operation not permitted) - DESTINATION OVERWRITE DavPosix::unlink  HTTP 403 : Permission refused 
-"/>
 			<system-out>Copying 16 bytes file:///home/efv97572/xrd-tests/TestScripts/tst.txt =&gt; https://ceph-svc16.gridpp.rl.ac.uk:1094//dteam:/test/tst.txt
 </system-out>
-			<system-err>gfal-copy error: 1 (Operation not permitted) - DESTINATION OVERWRITE DavPosix::unlink  HTTP 403 : Permission refused 
-</system-err>
 		</testcase>
 	</testsuite>
 </testsuites>
