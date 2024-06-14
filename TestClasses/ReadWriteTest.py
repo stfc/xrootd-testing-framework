@@ -36,26 +36,26 @@ class ReadWriteTest(BaseTest, PerformanceTest):
                     self.stdout = Testprocess.stdout
                     self.stderr = Testprocess.stderr
                     print('Output:', self.stdout, "Error:", self.stderr, Testprocess.returncode)
-
-
-
+                  
                     #To be altered?
-                    from junit_xml import TestSuite, TestCase
 
-                    test_cases = [TestCase('CopyTest', 'ReadWriteTest', 123.345, self.stdout, self.stderr)]
-                    [i.add_error_info(self.stderr) for i in test_cases]
-                    [i.add_failure_info("FAIL") for i in test_cases]
-                    ts = TestSuite("my test suite", test_cases)
+                    # results = ResultsHandler()
+                    # from junit_xml import TestSuite, TestCase
+
+                    # test_cases = [TestCase('CopyTest', 'ReadWriteTest', 123.345, self.stdout, self.stderr)]
+                    # [i.add_error_info(self.stderr) for i in test_cases]
+                    # [i.add_failure_info("FAIL") for i in test_cases]
+                    # ts = TestSuite("my test suite", test_cases)
                 
 
-                    # pretty printing is on by default but can be disabled using prettyprint=False
-                    with open('../Results/output.xml', 'w') as f:
-                        TestSuite.to_file(f, [ts], prettyprint=True)
+                    # # pretty printing is on by default but can be disabled using prettyprint=False
+                    # with open('../Results/output.xml', 'w') as f:
+                    #     TestSuite.to_file(f, [ts], prettyprint=True)
 
                     #subprocess.run(['ls', os.path.expanduser('../..')])
                     #Call subprocess on each combination, for whatever the specified command was
 
-        return Testprocess.returncode
+        return Testprocess.returncode, Testprocess.stdout, Testprocess.stderr
         
     def parse(self, struc, src, endpoint, dest, args=None):
         finalCmd = [struc[0]]
