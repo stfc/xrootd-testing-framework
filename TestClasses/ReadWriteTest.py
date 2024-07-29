@@ -1,45 +1,124 @@
 #!/usr/bin/env python3
-import inspect
-import re
+import sys
+import yaml
 from BaseTest import BaseTest
 from PerformanceTest import PerformanceTest
 import subprocess
 import os
+import time
+import numpy as np
 from zlib import adler32
 
 class ReadWriteTest(BaseTest, PerformanceTest):
-    def __init__(self):
+    def __init__(self, configFile=None, singleEndPoint=None, singleProt:list=None):
         super().__init__()
-        self.stdout = None
-        self.stderr = None
         self.groupedOutput = []
+        self.checksums = []
+
+        if configFile is not None:
+            with open(configFile) as config:
+                try:
+                    sites = yaml.safe_load(config)
+                    self.sitesList = sites['SITES']
+                except yaml.YAMLError as exc:
+                    print(exc)
+        
+        if singleEndPoint is not None:
+            self.sitesList = singleEndPoint
+        if singleProt is not None:
+            self.protocols = singleProt
+        #sys.exit()
+
     
-    def subprocess(self):
+    def subprocess(self, action:str, sourcePath=None, destinBaseNm=None, *args, timeout=None):
+        self.setup(action, sourcePath, destinBaseNm, *args)
+        self.groupedOutput = [] # May not need this to be an instance/class variable
+        self.checksums = []
+
         #Read-write tests will use xrdcp and gfal-copy
         #If the protocol is root, use xrootd. Otherwise the protocol we use is gfal-copy
-        #Go through each item in the self.matrix & create a combination of each protocol, server and root
-        for srvr in self.matrix[0]: #Iterate over protocols
-            for items in self.matrix[1:]:
-                for prot in items:
-            
-                    tool = self.cmds[prot] #e.g. tool=xrd
-                    endpoint = prot + srvr + ':' + str(self.port)
-                    ext = '_' + prot.strip(':/') + '_' + tool
-                    #destinPath = self.destinPath + ext
-                    print("NEW EXT:", self.destinPath+ext)
+        #create a combination of each protocol, server and root
 
-                    print("Input Args:", self.basecmd[self.action][tool], self.sourcePath, endpoint, self.destinPath+ext, self.args)
-                    fullCmd = self.parse(self.basecmd[self.action][tool], self.sourcePath, endpoint, self.destinPath+ext, self.args)
+        if action == 'load': self.sitesList = self.redirect
+        if timeout is not None:
+            timeout = ['timeout', str(timeout)]
+        
+        for site, siteVal in self.sitesList.items(): #Iterate over destination sites
+            for prot in self.protocols: #Iterate over protocols
+                
+                tool = self.cmds[prot] #e.g. tool=xrd
+                endpoint = prot + siteVal[0] + ':' + str(self.port)
+                ext = '_' + prot.strip(':/') + '_' + tool
+                self.destinPath = siteVal[1] + destinBaseNm
+                
+                fullCmd = self.parse(self.basecmd[self.action][tool], self.sourcePath, endpoint, self.destinPath+ext, self.args)
+                if timeout is not None:
+                    fullCmd = timeout + fullCmd
 
-                    print("Full Command:", fullCmd)
+                print("Full Command:", fullCmd, "\n Others:", endpoint, ext, self.destinPath)
+                
+                Testprocess = subprocess.run(fullCmd, capture_output=True, text=True)
+
+                outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr)
+                self.groupedOutput.append(outputs)
+
+                if action == "checksum":
+                    if Testprocess.returncode == 0:
+                        checksum = Testprocess.stdout.split(" ")[1].strip('\n')
+                    else:
+                        checksum = None
+                    self.checksums.append(checksum)
+        
+        if action == "checksum":
+            return self.checksums
+        else:
+            return self.groupedOutput
+
+    def timed(self, action:str, sourcePath=None, destinBaseNm=None, *args, timeout=None):
+        self.setup(action, sourcePath, destinBaseNm, *args)
+        self.groupedOutput = [] # May not need this to be an instance/class variable
+        self.checksums = []
+
+        #Read-write tests will use xrdcp and gfal-copy
+        #If the protocol is root, use xrootd. Otherwise the protocol we use is gfal-copy
+        #create a combination of each protocol, server and root
+
+        if action == 'load': self.sitesList = self.redirect
+        if timeout is not None:
+            timeout = ['timeout', str(timeout)]
+        
+        for site, siteVal in self.sitesList.items(): #Iterate over destination sites
+            for prot in self.protocols: #Iterate over protocols
+                
+                tool = self.cmds[prot] #e.g. tool=xrd
+                endpoint = prot + siteVal[0] + ':' + str(self.port)
+                ext = '_' + prot.strip(':/') + '_' + tool
+                self.destinPath = siteVal[1] + destinBaseNm
+                
+                fullCmd = self.parse(self.basecmd[self.action][tool], self.sourcePath, endpoint, self.destinPath+ext, self.args)
+                if timeout is not None:
+                    fullCmd = timeout + fullCmd
+                
+                times = []    
+                for i in range(5): # May make no. repetitions configurable 
+                    initialTime = time.time()
                     Testprocess = subprocess.run(fullCmd, capture_output=True, text=True)
+                    endTime = time.time()
 
-                    outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr)
-                    self.groupedOutput.append(outputs)
-                    print('Output:', self.stdout, "Error:", self.stderr, Testprocess.returncode)
+                    timeTot = endTime - initialTime
+                    times.append(timeTot)
+                
+                avgTime = float(np.mean(np.array(times)))
+
+
+                outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr, avgTime)
+                self.groupedOutput.append(outputs)
+
+                #print(self.groupedOutput)
 
         return self.groupedOutput
-        
+
+
     def parse(self, struc, src, endpoint, dest, args=None):
         finalCmd = [struc[0]]
         strucTmp = iter(struc[1:])
@@ -62,7 +141,6 @@ class ReadWriteTest(BaseTest, PerformanceTest):
         return finalCmd
 
     def adler32sum(self, filepath):
-        from zlib import adler32
         BLOCKSIZE = 256*1024*1024
         asum = 1
         with open(filepath, 'rb') as f:
@@ -72,7 +150,6 @@ class ReadWriteTest(BaseTest, PerformanceTest):
         return asum
     
     def xrdadler32(self, filePath):
-       
         cmd = ['/usr/bin/xrdadler32', os.path.expanduser(filePath)]
         Testprocess = subprocess.run(cmd, capture_output=True, text=True)     
         
