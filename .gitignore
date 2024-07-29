@@ -1,6 +1,0 @@
-'~'
-install
-memory_profiler
-upgrade
-TestScripts/__pycache__
-TestScripts/.pytest_cache

@@ -1,1 +1,0 @@
-# xrd_tests
