@@ -11,8 +11,8 @@ class Test_Copy:
     FILENAME = 'tst.txt'
     RWTest = ReadWriteTest()
     sourcesum = RWTest.xrdadler32(f'../TestData/{FILENAME}')
-    scenarios = RWTest.subprocess('copy', f'../TestData/{FILENAME}', f'dteam:/test/{FILENAME}', '--force')
-    destsum = RWTest.subprocess('checksum', None, f'dteam:/test/{FILENAME}', 'query', 'checksum')
+    scenarios = RWTest.subprocess('copy', f'../TestData/{FILENAME}', FILENAME, '--force')
+    destsum = RWTest.subprocess('checksum', None, FILENAME, 'query', 'checksum')
 
     @pytest.mark.parametrize(("scenario, destsum"), zip(scenarios, destsum))
     def test_copy(self, scenario, destsum):
@@ -21,11 +21,11 @@ class Test_Copy:
         assert returncode == 0, f"Upload failed: {stderr}, {stdout}"
         assert destsum == sourcesum, f"Stat failed: Mismatching checksums. Source: {sourcesum}, Dest: {destsum}"
 
+
     FILENAME = 'tst100K.txt'
     XRATE = '50k'
     fileSize = os.stat(f'../TestData/{FILENAME}').st_size
-    scenarios = RWTest.timed('copy', f'../TestData/{FILENAME}', f'dteam:/test/{FILENAME}', '--force', '--xrate', XRATE)
-    destsum = RWTest.subprocess('checksum', None, f'dteam:/test/{FILENAME}', 'query', 'checksum')
+    scenarios = RWTest.timed('copy', f'../TestData/{FILENAME}', FILENAME, '--force', '--xrate', XRATE)
     
     @pytest.mark.parametrize("scenario", scenarios)
     def test_xrate_copy(self, scenario):
@@ -35,8 +35,8 @@ class Test_Copy:
         assert  expectTime+1 >= avgTime >= expectTime-1
 
 
-    scenarios = RWTest.subprocess('copy', f'../TestData/{FILENAME}', f'dteam:/test/{FILENAME}', '--posc', '--xrate', XRATE, '--force', timeout=1)
-    destsum = RWTest.subprocess('checksum', None, f'dteam:/test/{FILENAME}', 'query', 'checksum')
+    scenarios = RWTest.subprocess('copy', f'../TestData/{FILENAME}', FILENAME, '--posc', '--xrate', XRATE, '--force', timeout=1)
+    destsum = RWTest.subprocess('checksum', None, FILENAME, 'query', 'checksum')
 
     @pytest.mark.parametrize(("scenario, destsum"), zip(scenarios, destsum))
     def test_posc_deletion(self, scenario, destsum):
@@ -45,19 +45,19 @@ class Test_Copy:
         assert destsum == None, f"Deletion failed: Checksum still present {destsum}"
 
 
-    scenarios = RWTest.subprocess('load', f'../TestData/{FILENAME}', f'dteam:/test/{FILENAME}', '--force')
-
-    @pytest.mark.parametrize("scenario", scenarios)
-    def load_redirection(self, scenario): #test needs adjusting
+    scenarios = RWTest.subprocess('load', f'../TestData/{FILENAME}', FILENAME)
+    
+    @pytest.mark.parametrize(("scenario"), (scenarios))
+    def test_load_redirection(self, scenario): #test needs adjusting
         returncode, stdout, stderr = scenario
-        assert returncode != 0, f"Deletion failed: {stderr}, {stdout}"
+        assert returncode != 0, f"Upload failed: {stderr}, {stdout}"
 
 
 class Test_Empty_Transfer:
     FILENAME = '0bytes.txt'
     RWTest = ReadWriteTest()
-    RWTest.subprocess('copy', f'../TestData/{FILENAME}', f'dteam:/test/{FILENAME}', '--force')
-    destsum = RWTest.subprocess('checksum', None, f'dteam:/test/{FILENAME}', 'query', 'checksum')
+    RWTest.subprocess('copy', f'../TestData/{FILENAME}', FILENAME, '--force')
+    destsum = RWTest.subprocess('checksum', None, FILENAME, 'query', 'checksum')
     
     @pytest.mark.parametrize(("destsum"), destsum)
     def test_empty(self, destsum):
@@ -68,7 +68,7 @@ class Test_Empty_Transfer:
 #     FILENAME = 'tst.txt'
 #     #First test - attempt transfer without token
 #     RWTest = ReadWriteTest('../TestData/ConfigReadWrite.yaml')
-#     scenarios = RWTest.subprocess('copy', f'../TestData/{FILENAME}', f'dteam:/test/{FILENAME}', '--force')
+#     scenarios = RWTest.subprocess('copy', f'../TestData/{FILENAME}', FILENAME, '--force')
     
     #Second test - generate token, then attempt transfer
     #Set env variable for token
@@ -79,8 +79,8 @@ class Test_Empty_Transfer:
 class Test_Delete:
     FILENAME = 'tst.txt'
     RWTest = ReadWriteTest()
-    scenarios = RWTest.subprocess('delete', None, f'dteam:/test/{FILENAME}', 'rm')
-    destsum = RWTest.subprocess('checksum', None, f'dteam:/test/{FILENAME}', 'query', 'checksum')
+    scenarios = RWTest.subprocess('delete', None, FILENAME, 'rm')
+    destsum = RWTest.subprocess('checksum', None, FILENAME, 'query', 'checksum')
 
     @pytest.mark.parametrize(("scenario, destsum"), zip(scenarios, destsum))
     def test_deletion(self, scenario, destsum):

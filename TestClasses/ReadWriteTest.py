@@ -55,7 +55,7 @@ class ReadWriteTest(BaseTest, PerformanceTest):
                 if timeout is not None:
                     fullCmd = timeout + fullCmd
 
-                print("Full Command:", fullCmd, "\n Others:", endpoint, ext, self.destinPath)
+                # print("Full Command:", fullCmd)
                 
                 Testprocess = subprocess.run(fullCmd, capture_output=True, text=True)
 
@@ -74,7 +74,7 @@ class ReadWriteTest(BaseTest, PerformanceTest):
         else:
             return self.groupedOutput
 
-    def timed(self, action:str, sourcePath=None, destinBaseNm=None, *args, timeout=None):
+    def timed(self, action:str, sourcePath=None, destinBaseNm=None, *args, reps=5, timeout=None):
         self.setup(action, sourcePath, destinBaseNm, *args)
         self.groupedOutput = [] # May not need this to be an instance/class variable
         self.checksums = []
@@ -98,9 +98,9 @@ class ReadWriteTest(BaseTest, PerformanceTest):
                 fullCmd = self.parse(self.basecmd[self.action][tool], self.sourcePath, endpoint, self.destinPath+ext, self.args)
                 if timeout is not None:
                     fullCmd = timeout + fullCmd
-                
+                         
                 times = []    
-                for i in range(5): # May make no. repetitions configurable 
+                for i in range(reps): # May make no. repetitions configurable 
                     initialTime = time.time()
                     Testprocess = subprocess.run(fullCmd, capture_output=True, text=True)
                     endTime = time.time()
@@ -109,9 +109,9 @@ class ReadWriteTest(BaseTest, PerformanceTest):
                     times.append(timeTot)
                 
                 avgTime = float(np.mean(np.array(times)))
+                fileSize = os.stat(self.sourcePath).st_size
 
-
-                outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr, avgTime)
+                outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr, avgTime, fileSize)
                 self.groupedOutput.append(outputs)
 
                 #print(self.groupedOutput)

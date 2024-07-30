@@ -13,16 +13,18 @@ class TPCTest(BaseTest):
         super().__init__()
         self.srcServer = None
         self.destinServer = None
-        self.siteA = {'CEPH-SVC16':['ceph-svc16.gridpp.rl.ac.uk', 'dteam:/test/tst.txt']} # Defaults if no config file? 
-        self.siteB = {'GOLIAS100': ['golias100.farm.particle.cz', 'dpm/farm.particle.cz/home/dteam/test/tst.txt']}
+        self.siteA = None #{'CEPH-SVC16':['ceph-svc16.gridpp.rl.ac.uk', 'dteam:/test/tst.txt']} # Defaults if no config file? 
+        self.siteB = None #{'GOLIAS100': ['golias100.farm.particle.cz', 'dpm/farm.particle.cz/home/dteam/test/tst.txt']}
         self.checksums = []
         self.basecmd = {'copy'      : {'xrd' : ['xrdcp', 'args', '--tpc', 'delegate', 'only', 'siteA', 'src', 'siteB', 'dest'], 
                                        'gfal': ['gfal-copy', 'siteA', 'src', 'siteB', 'dest', 'args']}, 
                         'checksum'  : {'xrd' : ['xrdfs', 'siteB', 'args', 'dest'], 
                                        'gfal': ['gfal-sum', 'siteB', 'dest', 'ADLER32']},  
                         'delete'    : {'xrd' : ['xrdfs', 'siteB', 'args', 'dest'], 
-                                       'gfal': ['gfal-rm', 'siteB', 'dest']},                            
-                                       }
+                                       'gfal': ['gfal-rm', 'siteB', 'dest']},          
+                        'load'      : {'xrd' : ['xrdcp','siteA', 'src', 'siteB', 'dest', '-d1', '--force'], 
+                                       'gfal': ['gfal-copy', 'src', 'endpoint', 'dest', '-v', 'args']}                  
+                        }
         
         #Reading config file for sites
         if configFile is not None:
@@ -49,10 +51,12 @@ class TPCTest(BaseTest):
             key, value = random.choice(list(self.siteA.items()))
             self.siteA = {key : value}
 
+        if action == 'load': self.siteB = self.redirect
+
         for uksite, uksiteVal in self.siteA.items():
 
             # If copy, Transfer an initial file named tst.txt to siteA:
-            if self.action == 'copy':
+            if self.action == 'copy' or self.action == 'load':
                 setupSrc = '../TestData/'+sourceBaseNm
                 setupDst = 'root://'+uksiteVal[0]+':'+str(self.port)+'//'+uksiteVal[1]+sourceBaseNm
                 setupCmd = ['xrdcp', setupSrc, setupDst, '--force']
@@ -114,7 +118,7 @@ class TPCTest(BaseTest):
             return self.groupedOutput
         
 
-    def timed(self, action:str, sourceBaseNm=None, destinBaseNm=None, *args, TestAll=False):
+    def timed(self, action:str, sourceBaseNm=None, destinBaseNm=None, *args, reps=5, TestAll=False):
 
         self.setup(action, None, None, *args)
         self.groupedOutput = []
@@ -125,6 +129,15 @@ class TPCTest(BaseTest):
             self.siteA = {key : value}
 
         for uksite, uksiteVal in self.siteA.items():
+
+            # If copy, Transfer an initial file named tst.txt to siteA:
+            if self.action == 'copy' or self.action == 'load':
+                setupSrc = '../TestData/'+sourceBaseNm
+                setupDst = 'root://'+uksiteVal[0]+':'+str(self.port)+'//'+uksiteVal[1]+destinBaseNm
+                setupCmd = ['xrdcp', setupSrc, setupDst, '--force']
+                subprocess.run(setupCmd, capture_output=True, text=True)
+                print("Initial file transferred")
+
             for extsite, extsiteVal in self.siteB.items():
                 for prot in self.protocols:
 
@@ -144,7 +157,7 @@ class TPCTest(BaseTest):
 
                     timesAB = []
                     timesBA = []
-                    for i in range(5): # This could be a separate method?
+                    for i in range(reps): # This could be a separate method?
                         # print("\n RUNNING SET", i)
                         initialTimeAB = time.time()
                         outputAB = subprocess.run(cmdAB, capture_output=True, text=True)
@@ -163,9 +176,10 @@ class TPCTest(BaseTest):
                     avgTimeAB = float(np.mean(np.array(timesAB)))
                     avgTimeBA = float(np.mean(np.array(timesBA)))
 
-                    
-                    returnAB = (outputAB.returncode, outputAB.stdout, outputAB.stderr, avgTimeAB)
-                    returnBA = (outputBA.returncode, outputBA.stdout, outputBA.stderr, avgTimeBA)
+                    fileSize = os.stat('../TestData/'+sourceBaseNm).st_size
+
+                    returnAB = (outputAB.returncode, outputAB.stdout, outputAB.stderr, avgTimeAB, fileSize)
+                    returnBA = (outputBA.returncode, outputBA.stdout, outputBA.stderr, avgTimeBA, fileSize)
 
                     self.groupedOutput.extend([returnAB, returnBA])
 
