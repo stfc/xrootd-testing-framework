@@ -8,10 +8,10 @@ import pytest
 class Test_Metadata_Format:
     FILENAME = 'tst.txt'
     RWTest = ReadWriteTest()
-    RWTest.subprocess('copy', f'../TestData/{FILENAME}', FILENAME, '--force') #Transfer file to destination
+    RWTest.genScenarios('copy', f'../TestData/{FILENAME}', FILENAME, '--force') #Transfer file to destination
 
     MDTest = MetadataTest()
-    scenarios = MDTest.subprocess('stat', None, FILENAME)
+    scenarios = MDTest.genScenarios('stat', None, FILENAME)
 
     @pytest.mark.parametrize("scenario", scenarios)
     def test_format(self, scenario):
@@ -22,10 +22,10 @@ class Test_Metadata_Format:
 class Test_Metadata_Checksum:
     FILENAME = 'tst.txt'
     RWTest = ReadWriteTest()
-    RWTest.subprocess('copy', f'../TestData/{FILENAME}', FILENAME, '--force')
+    RWTest.genScenarios('copy', f'../TestData/{FILENAME}', FILENAME, '--force')
 
     MDTest = MetadataTest()
-    checksums = MDTest.subprocess('checksum', f'../TestData/{FILENAME}', FILENAME)
+    checksums = MDTest.genScenarios('checksum', f'../TestData/{FILENAME}', FILENAME)
 
     @pytest.mark.parametrize("checksums", checksums)
     def test_endian(self, checksums):

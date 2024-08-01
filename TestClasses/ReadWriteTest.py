@@ -11,39 +11,24 @@ from zlib import adler32
 
 class ReadWriteTest(BaseTest, PerformanceTest):
     def __init__(self, configFile=None, singleEndPoint=None, singleProt:list=None):
-        super().__init__()
+        super().__init__(configFile)
         self.groupedOutput = []
         self.checksums = []
-
-        if configFile is not None:
-            with open(configFile) as config:
-                try:
-                    sites = yaml.safe_load(config)
-                    self.sitesList = sites['SITES']
-                except yaml.YAMLError as exc:
-                    print(exc)
         
         if singleEndPoint is not None:
             self.sitesList = singleEndPoint
         if singleProt is not None:
             self.protocols = singleProt
-        #sys.exit()
-
+            
     
-    def subprocess(self, action:str, sourcePath=None, destinBaseNm=None, *args, timeout=None):
-        self.setup(action, sourcePath, destinBaseNm, *args)
-        self.groupedOutput = [] # May not need this to be an instance/class variable
-        self.checksums = []
+    def genScenarios(self, action:str, sourcePath=None, destinBaseNm=None, *args, timeout=None):
+        self.setup(action, sourcePath, destinBaseNm, timeout, *args)
 
         #Read-write tests will use xrdcp and gfal-copy
         #If the protocol is root, use xrootd. Otherwise the protocol we use is gfal-copy
-        #create a combination of each protocol, server and root
-
-        if action == 'load': self.sitesList = self.redirect
-        if timeout is not None:
-            timeout = ['timeout', str(timeout)]
+        #create a combination of each protocol, server and root (i.e. a 'scenario')
         
-        for site, siteVal in self.sitesList.items(): #Iterate over destination sites
+        for site, siteVal in self.config['SITES'].items(): #Iterate over destination sites
             for prot in self.protocols: #Iterate over protocols
                 
                 tool = self.cmds[prot] #e.g. tool=xrd
@@ -51,43 +36,41 @@ class ReadWriteTest(BaseTest, PerformanceTest):
                 ext = '_' + prot.strip(':/') + '_' + tool
                 self.destinPath = siteVal[1] + destinBaseNm
                 
+                # Command changes depending on self.action
                 fullCmd = self.parse(self.basecmd[self.action][tool], self.sourcePath, endpoint, self.destinPath+ext, self.args)
-                if timeout is not None:
-                    fullCmd = timeout + fullCmd
+                if self.timeout is not None:
+                    fullCmd = ['timeout', str(self.timeout)] + fullCmd
 
-                # print("Full Command:", fullCmd)
+                print("Full cmd:", fullCmd)
+                continue
                 
                 Testprocess = subprocess.run(fullCmd, capture_output=True, text=True)
+                self.outputHandle(Testprocess)
 
-                outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr)
-                self.groupedOutput.append(outputs)
-
-                if action == "checksum":
-                    if Testprocess.returncode == 0:
-                        checksum = Testprocess.stdout.split(" ")[1].strip('\n')
-                    else:
-                        checksum = None
-                    self.checksums.append(checksum)
+        return self.results[self.action]
         
-        if action == "checksum":
-            return self.checksums
+
+    def outputHandle(self, Testprocess):
+       
+        if self.action == "checksum":
+            if Testprocess.returncode == 0:
+                checksum = Testprocess.stdout.split(" ")[1].strip('\n')
+            else:
+                checksum = None
+            self.results[self.action].append(checksum)
+            
         else:
-            return self.groupedOutput
-
-    def timed(self, action:str, sourcePath=None, destinBaseNm=None, *args, reps=5, timeout=None):
-        self.setup(action, sourcePath, destinBaseNm, *args)
-        self.groupedOutput = [] # May not need this to be an instance/class variable
-        self.checksums = []
-
-        #Read-write tests will use xrdcp and gfal-copy
-        #If the protocol is root, use xrootd. Otherwise the protocol we use is gfal-copy
-        #create a combination of each protocol, server and root
-
-        if action == 'load': self.sitesList = self.redirect
-        if timeout is not None:
-            timeout = ['timeout', str(timeout)]
+            outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr)
+            self.groupedOutput.append(outputs)
+            self.results[self.action].append(outputs)
         
-        for site, siteVal in self.sitesList.items(): #Iterate over destination sites
+        return
+
+
+    def genTimedScenarios(self, action:str, sourcePath=None, destinBaseNm=None, *args, reps=5, timeout=None):
+        self.setup(action, sourcePath, destinBaseNm, timeout, *args)
+                      
+        for site, siteVal in self.config['SITES'].items(): #Iterate over destination sites
             for prot in self.protocols: #Iterate over protocols
                 
                 tool = self.cmds[prot] #e.g. tool=xrd
@@ -96,27 +79,30 @@ class ReadWriteTest(BaseTest, PerformanceTest):
                 self.destinPath = siteVal[1] + destinBaseNm
                 
                 fullCmd = self.parse(self.basecmd[self.action][tool], self.sourcePath, endpoint, self.destinPath+ext, self.args)
-                if timeout is not None:
-                    fullCmd = timeout + fullCmd
-                         
-                times = []    
-                for i in range(reps): # May make no. repetitions configurable 
-                    initialTime = time.time()
-                    Testprocess = subprocess.run(fullCmd, capture_output=True, text=True)
-                    endTime = time.time()
+                if self.timeout is not None:
+                    fullCmd = self.timeout + fullCmd
+                self.timeOutputHandle(reps, fullCmd)
 
-                    timeTot = endTime - initialTime
-                    times.append(timeTot)
-                
-                avgTime = float(np.mean(np.array(times)))
-                fileSize = os.stat(self.sourcePath).st_size
+        return self.results[self.action]
+    
+    
+    def timeOutputHandle(self, reps, fullCmd):
+        times = []
+        for i in range(reps): # no. repetitions is configurable 
+            initialTime = time.time()
+            Testprocess = subprocess.run(fullCmd, capture_output=True, text=True)
+            endTime = time.time()
 
-                outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr, avgTime, fileSize)
-                self.groupedOutput.append(outputs)
+            timeTot = endTime - initialTime
+            times.append(timeTot)
+        
+        avgTime = float(np.mean(np.array(times)))
+        fileSize = os.stat(self.sourcePath).st_size
 
-                #print(self.groupedOutput)
+        outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr, avgTime, fileSize)
+        self.results[self.action].append(outputs)
 
-        return self.groupedOutput
+        return
 
 
     def parse(self, struc, src, endpoint, dest, args=None):
@@ -140,6 +126,7 @@ class ReadWriteTest(BaseTest, PerformanceTest):
 
         return finalCmd
 
+
     def adler32sum(self, filepath):
         BLOCKSIZE = 256*1024*1024
         asum = 1
@@ -148,14 +135,3 @@ class ReadWriteTest(BaseTest, PerformanceTest):
                 # print('read len:', len(data))
                 asum = adler32(data, asum)
         return asum
-    
-    def xrdadler32(self, filePath):
-        cmd = ['/usr/bin/xrdadler32', os.path.expanduser(filePath)]
-        Testprocess = subprocess.run(cmd, capture_output=True, text=True)     
-        
-        self.stdout = Testprocess.stdout
-        self.stderr = Testprocess.returncode
-        checksum = Testprocess.stdout.split(" ")[0]
-        print('Output:', self.stdout, "Error:", self.stderr)
-        
-        return checksum

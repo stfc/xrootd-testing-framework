@@ -8,8 +8,8 @@ import pytest
 class Test_TPCopy:
     FILENAME = 'tst.txt'
     TPCTest = TPCTest('../TestClasses/ConfigTPC.yaml')
-    scenarios = TPCTest.subprocess('copy', FILENAME, FILENAME, '--force', TestAll=False)
-    checksums = TPCTest.subprocess('checksum', FILENAME, FILENAME, 'query', 'checksum', TestAll=False)
+    scenarios = TPCTest.genScenarios('copy', FILENAME, FILENAME, '--force', TestAll=False)
+    checksums = TPCTest.genScenarios('checksum', FILENAME, FILENAME, TestAll=False)
 
     @pytest.mark.parametrize(("scenario, checksums"), zip(scenarios, checksums))
     def test_copy(self, scenario, checksums):
@@ -22,7 +22,7 @@ class Test_TPCopy:
         assert destsum == srcsum, f"Stat failed: Mismatching checksums. Source: {srcsum}, Dest: {destsum}"
 
     
-    scenarios = TPCTest.subprocess('load', FILENAME, FILENAME)
+    scenarios = TPCTest.genScenarios('load', FILENAME, FILENAME)
 
     @pytest.mark.parametrize("scenario", scenarios)
     def test_load_redirection(self, scenario): #test needs adjusting - Only want siteB and A->B to be self.redirect
@@ -35,8 +35,8 @@ class Test_TPCopy:
 class Test_Empty_Transfer:
     FILENAME = '0bytes.txt'
     TPCTest = TPCTest('../TestClasses/ConfigTPC.yaml')
-    scenarios = TPCTest.subprocess('copy', FILENAME, FILENAME, '--force')
-    checksums = TPCTest.subprocess('checksum', FILENAME, FILENAME, 'query', 'checksum')
+    scenarios = TPCTest.genScenarios('copy', FILENAME, FILENAME, '--force')
+    checksums = TPCTest.genScenarios('checksum', FILENAME, FILENAME)
     
     @pytest.mark.parametrize(("scenario, checksums"), zip(scenarios, checksums))
     def test_empty(self, scenario, checksums):
@@ -49,8 +49,8 @@ class Test_Empty_Transfer:
 class Test_TPDelete:
     FILENAME = 'tst.txt'
     TPCTest = TPCTest('../TestClasses/ConfigTPC.yaml')
-    scenarios = TPCTest.subprocess('copy', FILENAME, FILENAME, '--force')
-    checksums = TPCTest.subprocess('checksum', FILENAME, FILENAME, 'query', 'checksum')
+    scenarios = TPCTest.genScenarios('copy', FILENAME, FILENAME, '--force')
+    checksums = TPCTest.genScenarios('checksum', FILENAME, FILENAME)
 
     @pytest.mark.parametrize(("scenario, checksums"), zip(scenarios, checksums))
     def test_deletion(self, scenario, checksums):

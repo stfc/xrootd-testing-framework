@@ -9,7 +9,7 @@ import pytest
 class Test_Copy_Performance:
     RWTest = ReadWriteTest()
     FILENAME = 'tst2G.txt'
-    scenarios = RWTest.timed('copy', f'../TestData/{FILENAME}', FILENAME, '--force', reps=1)
+    scenarios = RWTest.genTimedScenarios('copy', f'../TestData/{FILENAME}', FILENAME, '--force', reps=1)
     
     @pytest.mark.parametrize("scenario", scenarios)
     def test_2GB(self, scenario):
@@ -21,7 +21,7 @@ class Test_Copy_Performance:
 
 
     FILENAME = 'tst40M.txt'
-    scenarios = RWTest.timed('copy', f'../TestData/{FILENAME}', FILENAME, '--force', reps=5)
+    scenarios = RWTest.genTimedScenarios('copy', f'../TestData/{FILENAME}', FILENAME, '--force', reps=5)
     
     @pytest.mark.parametrize("scenario", scenarios)
     def test_40MB(self, scenario):
@@ -34,7 +34,7 @@ class Test_Copy_Performance:
 class Test_TPCopy_Performance:
     TPCTest = TPCTest()
     FILENAME = 'tst2G.txt'
-    scenarios = TPCTest.timed('copy', FILENAME, FILENAME, '--force', reps=1)
+    scenarios = TPCTest.genTimedScenarios('copy', FILENAME, FILENAME, '--force', reps=1)
     
     @pytest.mark.parametrize("scenario", scenarios)
     def test_2GB(self, scenario):
@@ -51,7 +51,7 @@ class Test_TPCopy_Performance:
         assert expected-5 <= throughputBA <= expected+5
 
     FILENAME = 'tst40M.txt'
-    scenarios = TPCTest.timed('copy', FILENAME, FILENAME, '--force', reps=5)
+    scenarios = TPCTest.genTimedScenarios('copy', FILENAME, FILENAME, '--force', reps=5)
     
     @pytest.mark.parametrize("scenario", scenarios)
     def test_40MB(self, scenario):
