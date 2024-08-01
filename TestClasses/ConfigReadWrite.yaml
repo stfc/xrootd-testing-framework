@@ -1,0 +1,10 @@
+SITES: # Destintation SitesList
+  ATLAS
+      - atlas-auth.web.cern.ch
+      - atlas:test/
+    # CEPH-C04: 
+    #     - ceph-c04.glasgow.ac.uk
+    #     - dteam:/test/ 
+
+
+
