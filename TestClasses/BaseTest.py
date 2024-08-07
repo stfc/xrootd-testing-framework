@@ -2,6 +2,7 @@
 import os
 import subprocess
 import yaml
+import memory_profiler
 
 class BaseTest():
     def __init__(self, configFile=None):
@@ -11,8 +12,9 @@ class BaseTest():
         self.sourcePath = None
         self.destinPath = None
         self.args = None
+        self.cmds = []
         self.results = {}
-        self.cmds = {'root://':'xrd', 'https://':'gfal', 'davs://':'gfal'}       
+        self.tools = {'root://':'xrd', 'https://':'gfal', 'davs://':'gfal'}       
         self.sitesList = {'CEPH-SVC16':['ceph-svc16.gridpp.rl.ac.uk', 'dteam:/test/']} #'LHCONE':['eoslhcb.cern.ch', 'dteam:/test/'], 'LHCOPN':['ce01-lhcb-t2.cr.cnaf.infn.it'], 'DCACHE':'hostname3'}
         self.redirect = {'INT_MANAGER':['echo-internal-manager01.gridpp.rl.ac.uk', 'dteam:/test/']} 
         self.protocols = ['root://', 'davs://', 'https://']
@@ -31,6 +33,7 @@ class BaseTest():
                         }
         self.parseConfig(configFile)     
        
+
     def setup(self, action:str, sourcePath=None, destinPath=None, timeout=None, *args):
         self.results = {}
 
@@ -49,7 +52,7 @@ class BaseTest():
         self.action = action
         self.destinPath = destinPath
         self.args = args    
-
+        self.cmds = [] # Clear the cmds list each time setup is called (in genScenarios)
         self.results[self.action] = []
         
         # print("\n INITIAL ARGS:", action, sourcePath, destinPath, self.args)
@@ -73,3 +76,29 @@ class BaseTest():
         print('Output:', Testprocess.stdout, "Error:", Testprocess.stderr)
         
         return checksum
+    
+
+    def genCmds(self, action:str, sourcePath=None, destinBaseNm=None, *args, timeout=None):
+        self.setup(action, sourcePath, destinBaseNm, timeout, *args)
+
+        #Tests will use xrdcp and gfal-copy
+        #If the protocol is root, use xrootd. If https or davs, use gfal
+        #create a combination of each protocol, server and root (i.e. a 'scenario')
+        
+        cmds = []
+        for site, siteVal in self.config['SITES'].items(): #Iterate over destination sites
+            for prot in self.protocols: #Iterate over protocols
+                
+                tool = self.tools[prot] #e.g. tool=xrd
+                endpoint = prot + siteVal[0] + ':' + str(self.port)
+                ext = '_' + prot.strip(':/') + '_' + tool
+                self.destinPath = siteVal[1] + destinBaseNm
+                
+                # Command changes depending on self.action
+                fullCmd = self.parse(self.basecmd[self.action][tool], self.sourcePath, endpoint, self.destinPath+ext, self.args)
+                if self.timeout is not None:
+                    fullCmd = ['timeout', str(self.timeout)] + fullCmd
+
+                cmds.append(fullCmd)
+
+        return cmds

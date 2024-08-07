@@ -8,6 +8,8 @@ import os
 import time
 import numpy as np
 from zlib import adler32
+import memory_profiler
+import asyncio
 
 class ReadWriteTest(BaseTest, PerformanceTest):
     def __init__(self, configFile=None, singleEndPoint=None, singleProt:list=None):
@@ -19,69 +21,50 @@ class ReadWriteTest(BaseTest, PerformanceTest):
             self.sitesList = singleEndPoint
         if singleProt is not None:
             self.protocols = singleProt
-            
-    
-    def genScenarios(self, action:str, sourcePath=None, destinBaseNm=None, *args, timeout=None):
-        self.setup(action, sourcePath, destinBaseNm, timeout, *args)
-
-        #Read-write tests will use xrdcp and gfal-copy
-        #If the protocol is root, use xrootd. Otherwise the protocol we use is gfal-copy
-        #create a combination of each protocol, server and root (i.e. a 'scenario')
         
-        for site, siteVal in self.config['SITES'].items(): #Iterate over destination sites
-            for prot in self.protocols: #Iterate over protocols
-                
-                tool = self.cmds[prot] #e.g. tool=xrd
-                endpoint = prot + siteVal[0] + ':' + str(self.port)
-                ext = '_' + prot.strip(':/') + '_' + tool
-                self.destinPath = siteVal[1] + destinBaseNm
-                
-                # Command changes depending on self.action
-                fullCmd = self.parse(self.basecmd[self.action][tool], self.sourcePath, endpoint, self.destinPath+ext, self.args)
-                if self.timeout is not None:
-                    fullCmd = ['timeout', str(self.timeout)] + fullCmd
 
-                print("Full cmd:", fullCmd)
-                continue
-                
-                Testprocess = subprocess.run(fullCmd, capture_output=True, text=True)
-                self.outputHandle(Testprocess)
+    async def genScenarios(self, action:str, sourcePath=None, destinBaseNm=None, *args, timeout=None):
+        self.cmds = self.genCmds(action, sourcePath, destinBaseNm, *args, timeout=timeout)
+        
+        tasks = [asyncio.create_task(self._run_cmd(cmd)) for cmd in self.cmds]
 
+        await asyncio.gather(*tasks)
+        
         return self.results[self.action]
         
 
-    def outputHandle(self, Testprocess):
+    async def _run_cmd(self, cmd):
+        Testprocess = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE)
+
+        stdout, stderr = await Testprocess.communicate()
+        await self.outputHandle(Testprocess.returncode, stdout.decode().strip(), stderr.decode().strip())
+        
+        return
+
+    async def outputHandle(self, returncode, stdout, stderr):
        
         if self.action == "checksum":
-            if Testprocess.returncode == 0:
-                checksum = Testprocess.stdout.split(" ")[1].strip('\n')
+            if returncode == 0:
+                checksum = stdout.split(" ")[1].strip('\n')
             else:
                 checksum = None
             self.results[self.action].append(checksum)
             
         else:
-            outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr)
-            self.groupedOutput.append(outputs)
+            outputs = (returncode, stdout, stderr)
             self.results[self.action].append(outputs)
         
         return
 
 
     def genTimedScenarios(self, action:str, sourcePath=None, destinBaseNm=None, *args, reps=5, timeout=None):
-        self.setup(action, sourcePath, destinBaseNm, timeout, *args)
-                      
-        for site, siteVal in self.config['SITES'].items(): #Iterate over destination sites
-            for prot in self.protocols: #Iterate over protocols
-                
-                tool = self.cmds[prot] #e.g. tool=xrd
-                endpoint = prot + siteVal[0] + ':' + str(self.port)
-                ext = '_' + prot.strip(':/') + '_' + tool
-                self.destinPath = siteVal[1] + destinBaseNm
-                
-                fullCmd = self.parse(self.basecmd[self.action][tool], self.sourcePath, endpoint, self.destinPath+ext, self.args)
-                if self.timeout is not None:
-                    fullCmd = self.timeout + fullCmd
-                self.timeOutputHandle(reps, fullCmd)
+        self.cmds = self.genCmds(action, sourcePath, destinBaseNm, *args, timeout=timeout)
+            
+        for cmd in self.cmds:
+            self.timeOutputHandle(reps, cmd)
 
         return self.results[self.action]
     

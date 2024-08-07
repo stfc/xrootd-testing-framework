@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import asyncio
 import struct
 import sys
 import zlib
@@ -8,11 +9,6 @@ import subprocess
 class MetadataTest(BaseTest):
     def __init__(self, configFile=None):
         super().__init__(configFile)
-        self.fileName = None
-        self.fileType = None
-        self.fileSize = None
-        self.fileLocation = None
-        self.fileAuthor = None
         self.chksmFormat = []
         self.toolCategories = {'xrd' : ['Path:', 'Id:', 'Size:', 'MTime:', 'CTime:', 'ATime:', 'Flags:', 'Mode:', 'Owner:', 'Group:'],
                                'gfal': ['File:', 'Size:', 'Access:', 'Access:', 'Modify:', 'Change:']}
@@ -21,33 +17,37 @@ class MetadataTest(BaseTest):
                                 'gfal': ['gfal-stat', 'endpoint', 'dest', 'args']} # Addition of 'stat' as an action for metadata tests
 
 
-    def genScenarios(self, action:str, sourcePath=None, destinBaseNm=None, *args, timeout=None):
-        self.setup(action, sourcePath, destinBaseNm, timeout, *args)
-        
-        for site, siteVal in self.config['SITES'].items(): #Iterate over destination sites
-            for prot in self.protocols: #Iterate over protocols
-                
-                tool = self.cmds[prot] #e.g. tool=xrd
-                endpoint = prot + siteVal[0] + ':' + str(self.port)
-                ext = '_' + prot.strip(':/') + '_' + tool
-                self.destinPath = siteVal[1] + destinBaseNm
-                
-                fullCmd = self.parse(self.basecmd[self.action][tool], endpoint, self.destinPath+ext, self.args)
-                if self.timeout is not None:
-                    fullCmd = ['timeout', str(self.timeout)] + fullCmd
-                
-                Testprocess = subprocess.run(fullCmd, capture_output=True, text=True)
+    async def genScenarios(self, action:str, sourcePath=None, destinBaseNm=None, *args, timeout=None):
+        self.cmds = self.genCmds(action, sourcePath, destinBaseNm, *args, timeout=timeout)
+            
+        tasks = [asyncio.create_task(self._run_cmd(cmd)) for cmd in self.cmds]
 
-                self.outputHandle(Testprocess, tool)
-        
+        await asyncio.gather(*tasks)
+
         return self.results[self.action]
+        
+    async def _run_cmd(self, cmd):
+        # get tool from cmd:
+        if 'gfal' in cmd[1]:
+            tool = 'gfal'
+        else:
+            tool = 'xrd'
 
+        Testprocess = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE)
 
-    def outputHandle(self, Testprocess, tool):       
+        stdout, stderr = await Testprocess.communicate()
+        await self.outputHandle(Testprocess.returncode, stdout.decode().strip(), stderr.decode().strip(), tool)
+        
+        return
 
+    async def outputHandle(self, returncode, stdout, stderr, tool):       
+        
         if self.action == "checksum":
-            if Testprocess.returncode == 0:
-                checksum = Testprocess.stdout.split(" ")[1].strip('\n')
+            if returncode == 0:
+                checksum = stdout.split(" ")[1].strip('\n')
                 print("Checksum:", checksum)
                 endian = self.is_big_endian(self.sourcePath, checksum)
 
@@ -58,20 +58,20 @@ class MetadataTest(BaseTest):
             self.results[self.action].append((checksum, endian))
             
         else:
-            statResult = Testprocess.stdout.splitlines()
+            statResult = stdout.splitlines()
             categories = []
             for data in statResult:
                 entry = list(data.split())
                 if entry != []:
                     categories.append(entry[0])
 
-            outputs = (Testprocess.returncode, Testprocess.stdout, Testprocess.stderr, 
+            outputs = (returncode, stdout, stderr, 
                     categories, self.toolCategories[tool])
             self.results[self.action].append(outputs)
 
         return
 
-    def parse(self, struc, endpoint, dest, args=None):
+    def parse(self, struc, src, endpoint, dest, args=None):
         finalCmd = [struc[0]]
         strucTmp = iter(struc[1:])
 

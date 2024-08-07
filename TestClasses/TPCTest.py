@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import asyncio
 import sys
 import time
 import numpy as np
@@ -26,10 +27,12 @@ class TPCTest(BaseTest):
                                        'gfal': ['gfal-copy', 'siteA', 'src', 'siteB', 'dest', '-v', 'args']}                  
                         }
         
-
-    def genScenarios(self, action:str, sourceBaseNm=None, destinBaseNm=None, *args, TestAll=False):
-
+    
+    def genCmds(self, action:str, sourceBaseNm=None, destinBaseNm=None, *args, TestAll=False):
+        
         self.setup(action, None, None, self.timeout, *args)
+
+        cmds = []
 
         if TestAll == False:
             key, value = random.choice(list(self.config['TEST_ENDPOINT'].items()))
@@ -44,7 +47,7 @@ class TPCTest(BaseTest):
             for extsite, extsiteVal in self.siteB.items():
                 for prot in self.protocols:
 
-                    tool = self.cmds[prot]
+                    tool = self.tools[prot]
                     # if tool == 'gfal': # remove line later
                     #     continue
 
@@ -57,73 +60,69 @@ class TPCTest(BaseTest):
                     cmdAB = ['timeout', self.timeout] + self.parse(self.basecmd[self.action][tool], siteA, sourcePath, siteB, destinPath+'_ab', self.args)
                     siteA, siteB, sourcePath, destinPath = siteB, siteA, destinPath, sourcePath
                     cmdBA = ['timeout', self.timeout] + self.parse(self.basecmd[self.action][tool], siteA, sourcePath+'_ab', siteB, destinPath+'_ba', self.args)
-                
-                    # print("TIMEOUT:", self.timeout, "CmdAB:", cmdAB, "\n CmdBA:", cmdBA)
-                    # continue
 
-                    outputAB = subprocess.run(cmdAB, capture_output=True, text=True) # Runs the commands and obtains output
-                    outputBA = subprocess.run(cmdBA, capture_output=True, text=True)
-                    
-                    self.outputHandle(outputAB, outputBA)                    
+                    cmds.extend([(cmdAB, cmdBA)])
+
+        return cmds
+
+
+    async def genScenarios(self, action:str, sourceBaseNm=None, destinBaseNm=None, *args, TestAll=False):
+    
+        self.cmds = self.genCmds(action, sourceBaseNm, destinBaseNm, *args, TestAll=TestAll)
+
+        tasks = [asyncio.create_task(self._run_cmd(cmdPair)) for cmdPair in self.cmds]
+
+        await asyncio.gather(*tasks)              
         
         return self.results[self.action]
         
+    async def _run_cmd(self, cmdPair):
 
-    def outputHandle(self, outputAB, outputBA):
+        outputAB = await asyncio.create_subprocess_exec(
+        *cmdPair[0],
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE)
+
+        outputBA = await asyncio.create_subprocess_exec(
+        *cmdPair[1],
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE)
+
+        stdoutAB, stderrAB = await outputAB.communicate()
+        stdoutBA, stderrBA = await outputBA.communicate()
+
+        outputAB = (outputAB.returncode, stdoutAB.decode().strip(), stderrAB.decode().strip())
+        outputBA = (outputBA.returncode, stdoutBA.decode().strip(), stderrBA.decode().strip())      
+
+        await self.outputHandle(outputAB, outputBA)
+
+        return
+        
+
+    async def outputHandle(self, outputAB, outputBA):
        
         if self.action == "checksum": # Handles stdout to obtain the checksum values
             checksumPair = []
             for output in [outputAB, outputBA]:
-                if output.returncode == 0:
-                    checksum = output.stdout.split(" ")[1].strip('\n')
+                if output[0] == 0:
+                    checksum = output[1].split(" ")[1].strip('\n')
                 else:
                     checksum = None
                 checksumPair.append(checksum)
             self.results[self.action].append(checksumPair)
         else:
-            returnAB = (outputAB.returncode, outputAB.stdout, outputAB.stderr)
-            returnBA = (outputBA.returncode, outputBA.stdout, outputBA.stderr)
-            self.results[self.action].extend([(returnAB, returnBA)])
+            self.results[self.action].extend([(outputAB, outputBA)])
         
         return
     
 
     def genTimedScenarios(self, action:str, sourceBaseNm=None, destinBaseNm=None, *args, reps=5, TestAll=False):
 
-        self.setup(action, None, None, self.timeout, *args)
+        self.cmds = self.genCmds(action, sourceBaseNm, destinBaseNm, *args, TestAll=TestAll)
 
-        if TestAll == False:
-            key, value = random.choice(list(self.config['TEST_ENDPOINT'].items()))
-            self.config['TEST_ENDPOINT'] = {key : value}
+        for cmdPair in self.cmds:
+            self.timeOutputHandle(reps, cmdPair[0], cmdPair[1], sourceBaseNm)
 
-        for uksite, uksiteVal in self.config['TEST_ENDPOINT'].items():
-
-            # If copy, Transfer an initial file named tst.txt to siteA:
-            if self.action == 'copy' or self.action == 'load':
-                self.transferInitFile(sourceBaseNm, uksiteVal)
-
-            for extsite, extsiteVal in self.siteB.items():
-                for prot in self.protocols:
-
-                    tool = self.cmds[prot]
-                   
-                    siteA = prot + uksiteVal[0] + ':' + str(self.port)
-                    siteB = prot + extsiteVal[0] + ':' + str(self.port)
-
-                    sourcePath = uksiteVal[1] + sourceBaseNm
-                    destinPath = extsiteVal[1] + destinBaseNm
-
-                    cmdAB = ['timeout', self.timeout] + self.parse(self.basecmd[self.action][tool], siteA, sourcePath, siteB, destinPath+'_ab', self.args)
-
-                    siteA, siteB, sourcePath, destinPath = siteB, siteA, destinPath, sourcePath
-                    cmdBA = ['timeout', self.timeout] + self.parse(self.basecmd[self.action][tool], siteA, sourcePath+'_ab', siteB, destinPath+'_ba', self.args)
-
-                    # print("cmds:", cmdAB, "\n", cmdBA)
-                    # continue
-
-                    self.timeOutputHandle(reps, cmdAB, cmdBA, sourceBaseNm)
-
-        print(self.results[self.action])
         return self.results[self.action]
     
     
@@ -200,8 +199,8 @@ class TPCTest(BaseTest):
     def transferInitFile(self, sourceBaseNm, ukSite):
         setupSrc = '../TestData/'+sourceBaseNm
         setupDst = 'root://'+ukSite[0]+':'+str(self.port)+'//'+ukSite[1]+sourceBaseNm
-        setupCmd = ['xrdcp', setupSrc, setupDst, '--force']
-        # subprocess.run(setupCmd, capture_output=True, text=True)
+        setupCmd = ['timeout', self.timeout] + ['xrdcp', setupSrc, setupDst, '--force']
+        subprocess.run(setupCmd, capture_output=True, text=True)
         print("Initial file transferred:", setupCmd)
         
         return
