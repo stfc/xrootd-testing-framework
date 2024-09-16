@@ -1,14 +1,14 @@
-remote_theme: "pmarsceill/just-the-docs" 
-plugins:
-  - jekyll-remote-theme  
-  - jekyll-seo-tag
-  - jekyll-sitemap
-
 title: "XRootD Testing Framework Documentation"
 theme: jekyll-rtd-theme 
 description: "Documentation for the XRootD testing framework for pre-deployed endpoints"
 baseurl: "/docs"  # If your pages are under the `docs/` folder
 permalink: "/:path/"  # Makes URLs simpler
+
+remote_theme: "squidfunk/jekyll-rtd-theme" 
+plugins:
+  - jekyll-remote-theme  
+  - jekyll-seo-tag
+  - jekyll-sitemap
 
 # Specify where navigation data is stored
 data_dir: "_data"
