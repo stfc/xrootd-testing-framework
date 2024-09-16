@@ -1,10 +1,9 @@
 title: "XRootD Testing Framework Documentation"
-theme: jekyll-rtd-theme 
 description: "Documentation for the XRootD testing framework for pre-deployed endpoints"
 baseurl: "/docs"  # If your pages are under the `docs/` folder
 permalink: "/:path/"  # Makes URLs simpler
 
-remote_theme: pages-themes/minimal@v0.2.0
+remote_theme: "squidfunk/jekyll-rtd-theme"
 plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one
 
