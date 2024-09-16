@@ -1,11 +1,34 @@
+remote_theme: "pmarsceill/just-the-docs" 
+plugins:
+  - jekyll-remote-theme  
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
 title: "XRootD Testing Framework Documentation"
 theme: jekyll-rtd-theme 
 description: "Documentation for the XRootD testing framework for pre-deployed endpoints"
 baseurl: "/docs"  # If your pages are under the `docs/` folder
 permalink: "/:path/"  # Makes URLs simpler
 
-# Specify where your data (e.g., navigation) is stored
+# Specify where navigation data is stored
 data_dir: "_data"
 
 # Enable Markdown support for GitHub Pages
 markdown: kramdown
+show_sidebar: true
+search: true
+
+# Navigation links
+rtd_nav_links:
+  - title: "Home"
+    url: "/docs/"
+  - title: "Introduction"
+    url: "/docs/introduction"
+  - title: "Setup"
+    url: "/docs/setup"
+  - title: "Classes and Methods"
+    url: "/docs/classes-and-methods"
+  - title: "How to setup a test"
+    url: "/docs/setup-test-tutorial"
+  - title: "Examples"
+    url: "/docs/examples"
