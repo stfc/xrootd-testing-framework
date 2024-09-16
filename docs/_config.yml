@@ -1,0 +1,11 @@
+title: "XRootD Testing Framework Documentation"
+theme: jekyll-theme-minimal 
+description: "Documentation for the XRootD testing framework for pre-deployed endpoints"
+baseurl: "/docs"  # If your pages are under the `docs/` folder
+permalink: "/:path/"  # Makes URLs simpler
+
+# Specify where your data (e.g., navigation) is stored
+data_dir: "_data"
+
+# Enable Markdown support for GitHub Pages
+markdown: kramdown
