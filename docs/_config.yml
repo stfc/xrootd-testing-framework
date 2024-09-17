@@ -5,6 +5,7 @@ plugins:
 title: "XRootD Testing Framework Documentation"
 description: "Documentation for the XRootD testing framework for pre-deployed endpoints"
 baseurl: "/docs"  # If your pages are under the `docs/` folder
+url: "https://stfc.github.io/"
 permalink: "/:path/"  # Makes URLs simpler
 
 
