@@ -1,3 +1,6 @@
+---
+layout: default
+---
 ## XRootD Testing Framework
 
 ### What This Framework Is For:
