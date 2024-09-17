@@ -3,9 +3,10 @@ description: "Documentation for the XRootD testing framework for pre-deployed en
 baseurl: "/docs"  # If your pages are under the `docs/` folder
 permalink: "/:path/"  # Makes URLs simpler
 
-remote_theme: pages-themes/minimal@v0.2.0
-plugins:
-- jekyll-remote-theme
+theme: minima
+# remote_theme: pages-themes/minimal@v0.2.0
+# plugins:
+# - jekyll-remote-theme
 
 # Specify where navigation data is stored
 data_dir: "_data"
