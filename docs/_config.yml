@@ -5,8 +5,18 @@ permalink: "/:path/"  # Makes URLs simpler
 
 remote_theme: "squidfunk/jekyll-rtd-theme"
 plugins:
-- jekyll-remote-theme # add this line to the plugins list if you already have one
-
+- jekyll-remote-theme
+- jekyll-github-metadata
+- jekyll-seo-tag
+- jekyll-coffeescript
+- jekyll-commonmark-ghpages
+- jekyll-gist
+- jekyll-paginate
+- jekyll-relative-links
+- jekyll-optional-front-matter
+- jekyll-readme-index
+- jekyll-default-layout
+- jekyll-titles-from-headings
 
 # Specify where navigation data is stored
 data_dir: "_data"
