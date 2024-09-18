@@ -1,4 +1,3 @@
-## Installation
 ### Conda
 The latest versions of [XRootD](https://github.com/xrootd/xrootd?tab=readme-ov-file), [XRootD Python client](https://pypi.org/project/xrootd/) and [gfal2](https://github.com/cern-fts/gfal2) packages are required to generate and run the tests.
   
