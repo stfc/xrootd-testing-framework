@@ -1,5 +1,3 @@
-# Example 3 – TPCTest: Copy Test
-
 ## TPCopy Test Setup:
 This test setup transfers a file from site A to site B, and then back. Then, the checksums of both files are obtained. \
 > **NOTE:** The TPCTest object will automatically transfer a local file to site A when using ```action='copy'``` 
