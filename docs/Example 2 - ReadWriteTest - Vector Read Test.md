@@ -1,4 +1,3 @@
-# Example 2 – ReadWriteTest: Vector Read Test
 > **NOTE:** Currently this test can only use the root protocol, as the XRootD python client is used for vector reading.
 
 Protocols can be toggled when creating the test object, however it is not required to do this for ```action='readv'```:
