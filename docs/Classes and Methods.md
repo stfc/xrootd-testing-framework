@@ -1,5 +1,3 @@
-# Classes and Methods
-
 This section documents the setup classes and methods.
 
 ## BaseTest Class:
