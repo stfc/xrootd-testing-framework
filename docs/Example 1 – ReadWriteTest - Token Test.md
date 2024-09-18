@@ -1,5 +1,3 @@
-# Example 1 – ReadWriteTest: Token Test
-
 ## Token Test Setup:
 The setup for this test unsets the credentials, attempts to transfer a file to the endpoints, then resets the credentials.
 
