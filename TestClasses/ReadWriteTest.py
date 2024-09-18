@@ -182,9 +182,11 @@ class ReadWriteTest(BaseTest):
                 
             stdout, stderr = await Testprocess.communicate()
             endTime = time.time()
+
+            returncode, stdout, stderr = Testprocess.returncode, stdout.decode().strip(), stderr.decode().strip() 
             
         timeTaken = endTime - initialTime
-        returncode, stdout, stderr = Testprocess.returncode, stdout.decode().strip(), stderr.decode().strip() 
+        
 
         return returncode, stdout, stderr, timeTaken
         
