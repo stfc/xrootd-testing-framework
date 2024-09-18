@@ -1,0 +1,76 @@
+/* Make sure the main navigation is aligned horizontally */
+header .site-nav {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    display: flex;
+    justify-content: flex-start;
+}
+
+/* Style each navigation link */
+header .site-nav li {
+    margin-right: 20px;
+    color: #333;
+    position: relative;  /* Important for positioning the dropdown */
+}
+
+header .site-nav li a {
+    color: #333; /* Set link color to black */
+    white-space: nowrap;  /* Prevent text from breaking into two lines */
+}
+
+/* Style the dropdown anchor link */
+header .site-nav .dropdown > a {
+    text-decoration: none;
+    color: #333; /* Inherit the theme's default link color */
+    cursor: pointer;
+}
+
+/* Hide dropdown content by default */
+header ul.dropdown-content {
+    display: none;
+    position: absolute;
+    color: #333;
+    background-color: white;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    top: 100%;  /* Position it just below the parent link */
+    left: 0;
+    min-width: 160px;
+    z-index: 1;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+/* Style each dropdown item */
+header ul.dropdown-content li {
+    margin: 0;
+    padding: 5px 0;  /* Adjust vertical padding */
+}
+
+/* Style links in the dropdown */
+header ul.dropdown-content li a {
+    display: block;
+    padding: 8px 16px;  /* Adjust horizontal padding as needed */
+    color: #333;  /* Set link color to black */
+    text-decoration: none;
+}
+
+/* Ensure links in dropdown have underline on hover */
+header ul.dropdown-content li a:hover {
+    background-color: #f0f0f0;  /* Subtle hover background */
+    text-decoration: underline;  /* Underline effect on hover */
+}
+
+/* Show dropdown on hover */
+header li.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+
+/* Hover effect for main menu links */
+header .site-nav li a:hover {
+    color: #333;  /* Ensure hover color is also black, or adjust as needed */
+    text-decoration: underline;
+}

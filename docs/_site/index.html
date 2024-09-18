@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>XRootD Testing Framework | XRootD Testing Framework Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="XRootD Testing Framework" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<meta property="og:description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<link rel="canonical" href="http://localhost:4000/xrootd-testing-framework/" />
+<meta property="og:url" content="http://localhost:4000/xrootd-testing-framework/" />
+<meta property="og:site_name" content="XRootD Testing Framework Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="XRootD Testing Framework" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","description":"Documentation for the XRootD testing framework for pre-deployed endpoints","headline":"XRootD Testing Framework","name":"XRootD Testing Framework Documentation","url":"http://localhost:4000/xrootd-testing-framework/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/xrootd-testing-framework/feed.xml" title="XRootD Testing Framework Documentation" /></head>
+<body><header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" rel="author" href="/xrootd-testing-framework/">XRootD Testing Framework Documentation</a>
+        <nav>
+            <ul class="site-nav">
+                <li><a href="/xrootd-testing-framework/">Home</a></li>
+                <li><a href="/xrootd-testing-framework/installation/">Installation</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/classes_and_methods/">Classes and Methods</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/BaseTest/">BaseTest</a></li>
+                        <li><a href="/xrootd-testing-framework/ReadWriteTest/">ReadWriteTest</a></li>
+                        <li><a href="/xrootd-testing-framework/MetadataTest/">MetadataTest</a></li>
+                        <li><a href="/xrootd-testing-framework/TPCTest/">TPCTest</a></li>
+
+                    </ul>
+                </li>
+                
+                <li><a href="/xrootd-testing-framework/config_file_structure/">Config File Setup</a></li>
+                <li><a href="/xrootd-testing-framework/setup_test_tutorial/">How To Setup A Test</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/examples/">Examples Of Tests</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/example_1_readwritetest_token_test/">Example 1 - ReadWriteTest: Token Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_2_readwritetest_vector_read_test/">Example 2 - ReadWriteTest: Vector Read</a></li>
+                        <li><a href="/xrootd-testing-framework/example_3_tpctest_copy_test/">Example 3 - TPCTest: Copy Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/">Example 4 - TPCTest: Deletion (Performance) Test</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/css/style.css">
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="home"><h1 class="page-heading">XRootD Testing Framework</h1><p>GitHub Repository: <a href="https://github.com/stfc/xrootd-testing-framework/">https://github.com/stfc/xrootd-testing-framework/</a></p>
+
+<h3 id="what-this-framework-is-for">What This Framework Is For:</h3>
+<p>This framework is made to test XRootD functionalities and performance on pre-deployed endpoints. The purpose of these tests is to:</p>
+<ul>
+  <li>
+    <p>Check that basic XRootD functionality works with the endpoint’s setup and configuration</p>
+  </li>
+  <li>
+    <p>Benchmark the performance of file transfer and deletion</p>
+  </li>
+</ul>
+
+<h3 id="overview-of-how-it-works">Overview of How It Works:</h3>
+<p>The testing framework uses <a href="https://docs.pytest.org/en/7.1.x/contents.html">Pytest</a> to parametrize and run the tests. Accessory classes are used to setup the data for the tests. The classes are organised into 3 types: <strong><em>ReadWriteTests</em></strong>, <strong><em>ThirdPartyCopyTests</em></strong> and <strong><em>MetadataTests</em></strong>, with attributes and methods specific to their type.</p>
+
+<p>To set up a test, a test object is created from the relevant class. This object stores the endpoints that will be tested against, the port(s), and the protocol. The method <strong><em>genScenarios</em></strong> is used to setup <em>functional</em> tests, by generating XRootD (or gfal2) commands for each combination of protocol and endpoint.</p>
+
+<p>The commands will then be run asynchronously using the <a href="https://docs.python.org/3/library/asyncio-subprocess.html">asyncio-subprocess</a> module, which return a returncode, stdout and stderr to be stored as results. Other outputs relevant to the type of command are also stored, such as checksums. Once the commands have been run, the outputs will be returned by genScenarios in a dictionary, under keys describing the type of output.</p>
+
+<p>For <em>performance</em> tests, <strong><em>genTimedScenarios</em></strong> is used to:</p>
+<ul>
+  <li>Get the start and end time of the command</li>
+  <li>Re-run the command (default: 3) times</li>
+  <li>Get the average time taken to run the commands</li>
+</ul>
+
+<p>This average time is returned with the returncode, stdout and stderr.<br />
+After setting up the test by running the relevant commands, the output data is used to <a href="https://docs.pytest.org/en/7.1.x/how-to/parametrize.html#basic-pytest-generate-tests-example">parametrise</a> the Pytest test function. Each command is a scenario, and its output is used as a test case.</p>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/xrootd-testing-framework/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">XRootD Testing Framework Documentation</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">XRootD Testing Framework Documentation</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Documentation for the XRootD testing framework for pre-deployed endpoints</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -5,8 +5,8 @@ permalink: "/:path/"  # Makes URLs simpler
 
 theme: minima
 # remote_theme: pages-themes/minimal@v0.2.0
-# plugins:
-# - jekyll-remote-theme
+plugins:
+  - jekyll-titles-from-headings
 
 # Specify where navigation data is stored
 data_dir: "_data"
@@ -16,17 +16,31 @@ markdown: kramdown
 show_sidebar: true
 search: true
 
-# Navigation links
-rtd_nav_links:
-- title: "Home"
-  url: "/xrootd-testing-framework/"
-- title: "Installation"
-  url: "/xrootd-testing-framework/Installation.md"
-- title: "Classes and Methods"
-  url: "/xrootd-testing-framework/classes-and-methods.md"
-- title: "Config File Setup"
-  url: "/xrootd-testing-framework/config-file-setup"
-- title: "How To Setup A Test"
-  url: "/xrootd-testing-framework/setup-test-tutorial"
-- title: "Examples Of Tests"
-  url: "/xrootd-testing-framework/examples"
+titles_from_headings:
+  enabled:     true
+  strip_title: true
+  collections: false
+
+# # Navigation links
+# rtd_nav_links:
+# - title: "Home"
+#   url: "/xrootd-testing-framework/"
+# - title: "Installation"
+#   url: "/xrootd-testing-framework/installation.md" # Link to individual markdown files
+# - title: "Classes and Methods"
+#   url: "/xrootd-testing-framework/classes_and_methods.md"
+# - title: "Config File Setup"
+#   url: "/xrootd-testing-framework/config_file_structure.md"
+# - title: "How To Setup A Test"
+#   url: "/xrootd-testing-framework/setup_test_tutorial.md"
+# - title: "Examples Of Tests"
+#   url: "/xrootd-testing-framework/examples.md"
+#   children:
+#     - title: "Example 1 - ReadWriteTest: Token Test"
+#       url: "/xrootd-testing-framework/examples/example-1.md"  
+#     - title: "Example 2 - ReadWriteTest: Vector Read"
+#       url: "/xrootd-testing-framework/examples/example-2.md"
+#     - title: "Example 3 - TPCTest: Copy Test"
+#       url: "/xrootd-testing-framework/examples/example-3.md"
+#     - title: "Example 4 - TPCTest: Deletion (Performance) Test"
+#       url: "/xrootd-testing-framework/examples/example-4.md"

@@ -1,3 +1,4 @@
+# Example 2 – ReadWriteTest: Vector Read 
 > **NOTE:** Currently this test can only use the root protocol, as the XRootD python client is used for vector reading.
 
 Protocols can be toggled when creating the test object, however it is not required to do this for ```action='readv'```:
@@ -40,4 +41,4 @@ class Test_Vector_Read:
 $ pytest test_readwrite.py::Test_Token -v
 ~~~
 
-![alt text](image-4.png)
+![alt text]({{ site.baseurl }}/assets/css/images/image-4.png)

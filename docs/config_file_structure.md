@@ -1,3 +1,4 @@
+# Config File Structure
 The configuration file is a .yaml file that can be used to specify endpoints, site paths and ports to the test object.
 
 It is also possible to pass a directory, filename and file size, which can be generated during test setup.

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>BaseTest | XRootD Testing Framework Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="BaseTest" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<meta property="og:description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<link rel="canonical" href="http://localhost:4000/xrootd-testing-framework/BaseTest/" />
+<meta property="og:url" content="http://localhost:4000/xrootd-testing-framework/BaseTest/" />
+<meta property="og:site_name" content="XRootD Testing Framework Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="BaseTest" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Documentation for the XRootD testing framework for pre-deployed endpoints","headline":"BaseTest","url":"http://localhost:4000/xrootd-testing-framework/BaseTest/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/xrootd-testing-framework/feed.xml" title="XRootD Testing Framework Documentation" /></head>
+<body><header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" rel="author" href="/xrootd-testing-framework/">XRootD Testing Framework Documentation</a>
+        <nav>
+            <ul class="site-nav">
+                <li><a href="/xrootd-testing-framework/">Home</a></li>
+                <li><a href="/xrootd-testing-framework/installation/">Installation</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/classes_and_methods/">Classes and Methods</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/BaseTest/">BaseTest</a></li>
+                        <li><a href="/xrootd-testing-framework/ReadWriteTest/">ReadWriteTest</a></li>
+                        <li><a href="/xrootd-testing-framework/MetadataTest/">MetadataTest</a></li>
+                        <li><a href="/xrootd-testing-framework/TPCTest/">TPCTest</a></li>
+
+                    </ul>
+                </li>
+                
+                <li><a href="/xrootd-testing-framework/config_file_structure/">Config File Setup</a></li>
+                <li><a href="/xrootd-testing-framework/setup_test_tutorial/">How To Setup A Test</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/examples/">Examples Of Tests</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/example_1_readwritetest_token_test/">Example 1 - ReadWriteTest: Token Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_2_readwritetest_vector_read_test/">Example 2 - ReadWriteTest: Vector Read</a></li>
+                        <li><a href="/xrootd-testing-framework/example_3_tpctest_copy_test/">Example 3 - TPCTest: Copy Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/">Example 4 - TPCTest: Deletion (Performance) Test</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/css/style.css">
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">BaseTest</h1>
+  </header>
+
+  <div class="post-content">
+    <h2 id="basetest-class">BaseTest Class:</h2>
+<p>The BaseTest class stores the protocols, endpoints and ports to generate scenarios with. Methods and attributes of this class are inherited by the subclasses: ReadWriteTest, MetadataTest and TPCTest</p>
+
+<p><em>class</em> <strong>BaseTest( <em>configFile</em></strong>=None, <strong><em>createFiles</em></strong>=False, <strong><em>root</em></strong>=True, <strong><em>https</em></strong>=True, <strong><em>davs</em></strong>=True <strong>)</strong></p>
+
+<p>A configuration file can be passed upon instantiation of the subclasses containing the endpoint, file path and optional port.</p>
+
+<p>Optionally, specifying a directory, file name(s) and file size(s) in the config file and instantiating with <code class="language-plaintext highlighter-rouge">createFiles=True</code> will generate these files in the provided directory.</p>
+
+<p>To exclude up to two of the protocols from being used, they can be toggled to False when instantiating the subclass</p>
+
+<h3 id="basetest-methods">BaseTest Methods:</h3>
+<hr />
+<p>This class has the following accessory methods that can be used for test setup/teardown by the user:</p>
+
+<p><em>method</em> <strong>xrdadler32( <em>filePath</em> )</strong></p>
+
+<p>Uses the xrdadler32 shell script to obtain an adler32 checksum of any single file. The checksum is hexadecimal and of type big-Endian.</p>
+
+<p>     <strong>Parameters:</strong></p>
+<ul>
+  <li><strong>filePath</strong> (<em>string</em>) – A path to the file, local or on the endpoint</li>
+</ul>
+
+<p>     <strong>Returns:</strong><br />
+         Returns the checksum as a string</p>
+
+<p>     <strong>Return type:</strong><br />
+         String</p>
+
+<hr />
+
+<p><em>method</em> <strong>unsetCreds( <em>vomsProxy</em></strong>=None, <strong><em>bearerToken</em></strong>=None, <strong><em>x509User</em></strong>=None <strong>)</strong></p>
+
+<p>Temporarily removes the VOMS proxy token file from the given directory and copies it to a temporary location, and un-sets the <code class="language-plaintext highlighter-rouge">BEARER_TOKEN</code> and <code class="language-plaintext highlighter-rouge">X509_USER_PROXY</code> environmental variables.</p>
+
+<p>     <strong>Parameters:</strong></p>
+<ul>
+  <li><strong>vomsProxy</strong> (<em>string, optional</em>) – A path to the VOMS proxy file</li>
+  <li><strong>bearerToken</strong> (<em>string, optional</em>) – Value of the <code class="language-plaintext highlighter-rouge">BEARER_TOKEN</code> environmental variable</li>
+  <li><strong>X509_USER_PROXY</strong> (<em>string, optional</em>) – Value of the <code class="language-plaintext highlighter-rouge">X509_USER_PROXY</code> environmental variable</li>
+</ul>
+
+<p>     <strong>Returns:</strong> <br />
+         None</p>
+
+<hr />
+
+<p><em>method</em> <strong>resetCreds( <em>vomsProxy</em></strong>=None, <strong><em>bearerToken</em></strong>=None, <strong><em>x509User</em></strong>=None <strong>)</strong></p>
+
+<p>Restores the VOMS proxy token file to the given directory, and resets the <code class="language-plaintext highlighter-rouge">BEARER_TOKEN</code> and <code class="language-plaintext highlighter-rouge">X509_USER_PROXY</code> environmental variables with the given values.</p>
+
+<p>     <strong>Parameters:</strong></p>
+<ul>
+  <li><strong>vomsProxy</strong> (<em>string, optional</em>) – A path to the VOMS proxy file</li>
+  <li><strong>bearerToken</strong> (<em>string, optional</em>) – Value of the <code class="language-plaintext highlighter-rouge">BEARER_TOKEN</code> environmental variable</li>
+  <li><strong>X509_USER_PROXY</strong> (<em>string, optional</em>) – Value of the <code class="language-plaintext highlighter-rouge">X509_USER_PROXY</code> environmental variable</li>
+</ul>
+
+<p>     <strong>Returns:</strong><br />
+         None</p>
+
+<hr />
+
+<p><em>method</em> <strong>cleanup()</strong></p>
+
+<p>Removes the files generated from the configuration file when the class was instantiated.</p>
+
+<p>     <strong>Parameters:</strong> <br />
+         None</p>
+
+<p>     <strong>Returns:</strong><br />
+         None</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/xrootd-testing-framework/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">XRootD Testing Framework Documentation</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">XRootD Testing Framework Documentation</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Documentation for the XRootD testing framework for pre-deployed endpoints</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

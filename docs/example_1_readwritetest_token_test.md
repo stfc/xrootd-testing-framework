@@ -1,5 +1,8 @@
+# Example 1 – ReadWriteTest: Token Test
+
 ## Token Test Setup:
 The setup for this test unsets the credentials, attempts to transfer a file to the endpoints, then resets the credentials.
+
 
 Setup the ```pytest_generate_tests``` function:
 ~~~
@@ -50,5 +53,5 @@ class Test_Token:
 ~~~
 $ pytest test_readwrite.py::Test_Token -v
 ~~~
-![alt text](image-3.png)
+![alt text]({{ site.baseurl }}/assets/css/images/image-3.png)
 

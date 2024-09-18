@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Example 2 – ReadWriteTest: Vector Read | XRootD Testing Framework Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Example 2 – ReadWriteTest: Vector Read" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<meta property="og:description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<link rel="canonical" href="http://localhost:4000/xrootd-testing-framework/example_2_readwritetest_vector_read_test/" />
+<meta property="og:url" content="http://localhost:4000/xrootd-testing-framework/example_2_readwritetest_vector_read_test/" />
+<meta property="og:site_name" content="XRootD Testing Framework Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Example 2 – ReadWriteTest: Vector Read" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Documentation for the XRootD testing framework for pre-deployed endpoints","headline":"Example 2 – ReadWriteTest: Vector Read","url":"http://localhost:4000/xrootd-testing-framework/example_2_readwritetest_vector_read_test/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/xrootd-testing-framework/feed.xml" title="XRootD Testing Framework Documentation" /></head>
+<body><header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" rel="author" href="/xrootd-testing-framework/">XRootD Testing Framework Documentation</a>
+        <nav>
+            <ul class="site-nav">
+                <li><a href="/xrootd-testing-framework/">Home</a></li>
+                <li><a href="/xrootd-testing-framework/installation/">Installation</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/classes_and_methods/">Classes and Methods</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/BaseTest/">BaseTest</a></li>
+                        <li><a href="/xrootd-testing-framework/ReadWriteTest/">ReadWriteTest</a></li>
+                        <li><a href="/xrootd-testing-framework/MetadataTest/">MetadataTest</a></li>
+                        <li><a href="/xrootd-testing-framework/TPCTest/">TPCTest</a></li>
+
+                    </ul>
+                </li>
+                
+                <li><a href="/xrootd-testing-framework/config_file_structure/">Config File Setup</a></li>
+                <li><a href="/xrootd-testing-framework/setup_test_tutorial/">How To Setup A Test</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/examples/">Examples Of Tests</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/example_1_readwritetest_token_test/">Example 1 - ReadWriteTest: Token Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_2_readwritetest_vector_read_test/">Example 2 - ReadWriteTest: Vector Read</a></li>
+                        <li><a href="/xrootd-testing-framework/example_3_tpctest_copy_test/">Example 3 - TPCTest: Copy Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/">Example 4 - TPCTest: Deletion (Performance) Test</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/css/style.css">
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Example 2 – ReadWriteTest: Vector Read</h1>
+  </header>
+
+  <div class="post-content">
+    <blockquote>
+  <p><strong>NOTE:</strong> Currently this test can only use the root protocol, as the XRootD python client is used for vector reading.</p>
+</blockquote>
+
+<p>Protocols can be toggled when creating the test object, however it is not required to do this for <code class="language-plaintext highlighter-rouge">action='readv'</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>RWTestxrd = ReadWriteTest(configFile="../TestClasses/ConfigReadWrite.yaml", davs=False, https=False)
+</code></pre></div></div>
+
+<h2 id="vector-read-test-setup">Vector Read Test Setup:</h2>
+<p>This test’s setup involves first transferring the files to the endpoints. 
+Then, call genScenarios and pass <code class="language-plaintext highlighter-rouge">action=’readv’</code>, and <code class="language-plaintext highlighter-rouge">vector=[(0, 100)]</code> to obtain these chunks from the destination and source files.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    ...
+    elif class_name == "Test_Vector_Read":
+        if test_name == "test_chunks_0_100":
+            FILENAME = 'tst.txt'
+
+            loop.run_until_complete(RWTestxrd.genScenarios('copy', f'../TestData/{FILENAME}', FILENAME, 
+                        xrdArgs='--force', gfalArgs='--force'))
+
+            outputs = loop.run_until_complete(RWTestxrd.genScenarios('readv', 
+                        sourcePath=f'../TestData/{FILENAME}', vector=[(0,10)]))
+
+            testCases = zip(outputs['cmdOuts'], outputs['srcchunks'])
+            ids = outputs['IDs']
+            metafunc.parametrize("cmdOut, srcChunk", testCases, ids=ids)
+</code></pre></div></div>
+
+<h2 id="vector-read-test-function">Vector Read Test Function:</h2>
+<p>For the test to pass, the returncode from the destination vector read should equal 0, and the source file and destination file’s chunks should match.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Test_Vector_Read:
+    def test_chunks_0_100(self, cmdOut, srcChunk):
+        returncode, destChunk, stderr = cmdOut
+        assert returncode == 0; f"Vector read of destination file failed. Error: {stderr}"
+        assert srcChunk == destChunk; f"Vectors of local file and destination file do not match"
+</code></pre></div></div>
+
+<h2 id="result">Result:</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ pytest test_readwrite.py::Test_Token -v
+</code></pre></div></div>
+
+<p><img src="/xrootd-testing-framework/assets/css/images/image-4.png" alt="alt text" /></p>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/xrootd-testing-framework/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">XRootD Testing Framework Documentation</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">XRootD Testing Framework Documentation</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Documentation for the XRootD testing framework for pre-deployed endpoints</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

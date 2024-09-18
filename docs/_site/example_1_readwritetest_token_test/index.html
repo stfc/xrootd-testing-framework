@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Example 1 – ReadWriteTest: Token Test | XRootD Testing Framework Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Example 1 – ReadWriteTest: Token Test" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<meta property="og:description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<link rel="canonical" href="http://localhost:4000/xrootd-testing-framework/example_1_readwritetest_token_test/" />
+<meta property="og:url" content="http://localhost:4000/xrootd-testing-framework/example_1_readwritetest_token_test/" />
+<meta property="og:site_name" content="XRootD Testing Framework Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Example 1 – ReadWriteTest: Token Test" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Documentation for the XRootD testing framework for pre-deployed endpoints","headline":"Example 1 – ReadWriteTest: Token Test","url":"http://localhost:4000/xrootd-testing-framework/example_1_readwritetest_token_test/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/xrootd-testing-framework/feed.xml" title="XRootD Testing Framework Documentation" /></head>
+<body><header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" rel="author" href="/xrootd-testing-framework/">XRootD Testing Framework Documentation</a>
+        <nav>
+            <ul class="site-nav">
+                <li><a href="/xrootd-testing-framework/">Home</a></li>
+                <li><a href="/xrootd-testing-framework/installation/">Installation</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/classes_and_methods/">Classes and Methods</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/BaseTest/">BaseTest</a></li>
+                        <li><a href="/xrootd-testing-framework/ReadWriteTest/">ReadWriteTest</a></li>
+                        <li><a href="/xrootd-testing-framework/MetadataTest/">MetadataTest</a></li>
+                        <li><a href="/xrootd-testing-framework/TPCTest/">TPCTest</a></li>
+
+                    </ul>
+                </li>
+                
+                <li><a href="/xrootd-testing-framework/config_file_structure/">Config File Setup</a></li>
+                <li><a href="/xrootd-testing-framework/setup_test_tutorial/">How To Setup A Test</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/examples/">Examples Of Tests</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/example_1_readwritetest_token_test/">Example 1 - ReadWriteTest: Token Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_2_readwritetest_vector_read_test/">Example 2 - ReadWriteTest: Vector Read</a></li>
+                        <li><a href="/xrootd-testing-framework/example_3_tpctest_copy_test/">Example 3 - TPCTest: Copy Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/">Example 4 - TPCTest: Deletion (Performance) Test</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/css/style.css">
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Example 1 – ReadWriteTest: Token Test</h1>
+  </header>
+
+  <div class="post-content">
+    <h2 id="token-test-setup">Token Test Setup:</h2>
+<p>The setup for this test unsets the credentials, attempts to transfer a file to the endpoints, then resets the credentials.</p>
+
+<p>Setup the <code class="language-plaintext highlighter-rouge">pytest_generate_tests</code> function:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def pytest_generate_tests(metafunc):
+    loop = asyncio.get_event_loop()
+    RWTest = ReadWriteTest(configFile="../TestClasses/ConfigReadWrite.yaml", createFiles=False)
+    test_name = metafunc.function.__name__
+    class_name = metafunc.cls.__name__
+</code></pre></div></div>
+
+<p>Add the token test’s setup code:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    if class_name == "Test_Token":
+        if test_name == "test_copy_without_token":
+            FILENAME = 'tst.txt'
+Use unsetCreds method to unset environmental variable for token and voms_proxy:
+            bearerToken = os.getenv("BEARER_TOKEN")
+            x509User = os.getenv("X509_USER_PROXY")
+            RWTest.unsetCreds('/tmp/x509up_*', bearerToken, x509User)
+</code></pre></div></div>
+
+<p>Transfer the file and obtain the outputs:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>            outputs = loop.run_until_complete(RWTest.genScenarios('copy', f'../TestData/{FILENAME}', FILENAME, 
+                        xrdArgs='--force', gfalArgs='--force'))
+
+            testCases = outputs['cmdOuts']
+            ids = outputs['IDs']
+            metafunc.parametrize("cmdOut", testCases, ids=ids)
+</code></pre></div></div>
+
+<p>Use resetCreds method to reset environmental variables for token and voms_proxy:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>            RWTest.resetCreds('/tmp/x509up_*', bearerToken, x509User)
+</code></pre></div></div>
+
+<h2 id="token-test-function">Token Test Function:</h2>
+<p>Without the credentials, the returncode from the file transfer should fail, i.e. not equal 0:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Test_Token:
+    def test_copy_without_token(self, cmdOut):
+        returncode, stdout, stderr = cmdOut
+        assert returncode != 0; f"Upload Succeeded Without Token: {stdout}, {stderr}"
+</code></pre></div></div>
+
+<h2 id="result">Result:</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ pytest test_readwrite.py::Test_Token -v
+</code></pre></div></div>
+<p><img src="/xrootd-testing-framework/assets/css/images/image-3.png" alt="alt text" /></p>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/xrootd-testing-framework/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">XRootD Testing Framework Documentation</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">XRootD Testing Framework Documentation</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Documentation for the XRootD testing framework for pre-deployed endpoints</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

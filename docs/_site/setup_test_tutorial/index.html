@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>How To Setup and Write A Test | XRootD Testing Framework Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="How To Setup and Write A Test" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<meta property="og:description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<link rel="canonical" href="http://localhost:4000/xrootd-testing-framework/setup_test_tutorial/" />
+<meta property="og:url" content="http://localhost:4000/xrootd-testing-framework/setup_test_tutorial/" />
+<meta property="og:site_name" content="XRootD Testing Framework Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="How To Setup and Write A Test" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Documentation for the XRootD testing framework for pre-deployed endpoints","headline":"How To Setup and Write A Test","url":"http://localhost:4000/xrootd-testing-framework/setup_test_tutorial/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/xrootd-testing-framework/feed.xml" title="XRootD Testing Framework Documentation" /></head>
+<body><header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" rel="author" href="/xrootd-testing-framework/">XRootD Testing Framework Documentation</a>
+        <nav>
+            <ul class="site-nav">
+                <li><a href="/xrootd-testing-framework/">Home</a></li>
+                <li><a href="/xrootd-testing-framework/installation/">Installation</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/classes_and_methods/">Classes and Methods</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/BaseTest/">BaseTest</a></li>
+                        <li><a href="/xrootd-testing-framework/ReadWriteTest/">ReadWriteTest</a></li>
+                        <li><a href="/xrootd-testing-framework/MetadataTest/">MetadataTest</a></li>
+                        <li><a href="/xrootd-testing-framework/TPCTest/">TPCTest</a></li>
+
+                    </ul>
+                </li>
+                
+                <li><a href="/xrootd-testing-framework/config_file_structure/">Config File Setup</a></li>
+                <li><a href="/xrootd-testing-framework/setup_test_tutorial/">How To Setup A Test</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/examples/">Examples Of Tests</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/example_1_readwritetest_token_test/">Example 1 - ReadWriteTest: Token Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_2_readwritetest_vector_read_test/">Example 2 - ReadWriteTest: Vector Read</a></li>
+                        <li><a href="/xrootd-testing-framework/example_3_tpctest_copy_test/">Example 3 - TPCTest: Copy Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/">Example 4 - TPCTest: Deletion (Performance) Test</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/css/style.css">
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">How To Setup and Write A Test</h1>
+  </header>
+
+  <div class="post-content">
+    <p>This section describes how to use the setup class <em>ReadWriteTest</em> to setup the data for the test, and how to write the test function itself.</p>
+
+<h2 id="how-to-setup-a-test">How To Setup A Test:</h2>
+<p>Setup, and naming of the test file and function follow the <a href="https://docs.pytest.org/en/stable/explanation/goodpractices.html">pytest conventions</a>: <br />
+Pytest filenames, classes and test functions will start with <code class="language-plaintext highlighter-rouge">test_*</code> or <code class="language-plaintext highlighter-rouge">Test_*</code>.</p>
+
+<p>This example will look at how to write a test for a <strong>copy</strong> test using the <em>ReadWriteTest</em> class. <br />
+For this copy test, we will need to:</p>
+<ul>
+  <li>Copy the file to the destination(s) and get the returncode, stdout, and stderr</li>
+  <li>Obtain the checksum for the source and destination files</li>
+  <li>Check the returncode status of the copy command is 0</li>
+  <li>Check that the source file and destination file checksums match</li>
+</ul>
+
+<p>In the test file, we define and use pytest’s <code class="language-plaintext highlighter-rouge">pytest_generate_tests</code> <a href="https://docs.pytest.org/en/7.1.x/reference/reference.html#pytest.hookspec.pytest_generate_tests">function</a> to write setup code for tests.  We can configure this function to run specific code before each of our test functions.</p>
+
+<p>First, define pytest_generate_tests:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def pytest_generate_tests(metafunc): 
+</code></pre></div></div>
+<p>Then, we store the name of the test class and test function, initialise the asyncio event loop, and the appropriate test object:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def pytest_generate_tests(metafunc):
+	class_name = metafunc.cls.__name__
+	test_name = metafunc.function.__name__
+	loop = asyncio.get_event_loop()
+	RWTest = ReadWriteTest(configFile=ConfigReadWrite.yaml)
+</code></pre></div></div>
+
+<p>Now, add an ‘if’ statement that ensures that the setup code runs before the test function is called. In this example, we will have a test class called ‘Test_Copy’, and the test function will be called ‘test_copy’:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	if class_name == "Test_Copy":
+        if test_name == "test_copy":
+</code></pre></div></div>
+
+<p>Time to write the setup code – Under <code class="language-plaintext highlighter-rouge">if test_name == "test_copy":</code>, let’s store the test file name as a variable, use the genScenarios method to copy that file to the endpoints, and store the outputs:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FILENAME = 'tst.txt'
+outputs = loop.run_until_complete(RWTest.genScenarios('copy', sourcePath=f'../TestData/{FILENAME}', xrdArgs='--force', gfalArgs='--force'))
+</code></pre></div></div>
+<p>Here, we passed the optional arguments <code class="language-plaintext highlighter-rouge">'--force'</code>, which will overwrite the server file if it already exists.</p>
+
+<p>Next, we need to get the checksums of the files on the endpoints, and store those:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>destsums = loop.run_until_complete(RWTest.genScenarios('checksum', destinBaseNm=FILENAME))
+</code></pre></div></div>
+<p>The outputs we have obtained are:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">outputs[‘IDs’] = [protocol:endpoint-file, … protocol:endpoint-file]</code></li>
+  <li><code class="language-plaintext highlighter-rouge">outputs[‘cmdOuts’] = [(returncode, stdout, stderr), … (returncode, stdout, stderr)]</code></li>
+  <li><code class="language-plaintext highlighter-rouge">outputs[‘srcsums’] = [checksum1, … checksumx]</code></li>
+  <li><code class="language-plaintext highlighter-rouge">destsums[‘destsums’] = [checksum1, … checksumx]</code></li>
+  <li><code class="language-plaintext highlighter-rouge">destsums[‘cmdOuts’] = [stderr1, … stderrx]</code></li>
+</ul>
+
+<p>For each list, the items at index 0 correspond to the first scenario, or test case. The items at index 1 correspond to the second, and so on.</p>
+
+<p>We can now <a href="https://docs.pytest.org/en/stable/example/parametrize.html"><strong>parametrize</strong></a> our test with these outputs using <code class="language-plaintext highlighter-rouge">metafunc.parametrize</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>metafunc.parametrize("cmdOut, srcsums, destsums, destderrs", 
+[outputs[‘cmdOuts’], outputs[‘srcsums’], destsums[‘destsums’], destsums[‘cmdOuts’]], ids=outputs[‘IDs’])
+</code></pre></div></div>
+
+<p>For a cleaner syntax, we can also use ‘zip’ to gather the outputs as <code class="language-plaintext highlighter-rouge">testCases</code> before passing them to <code class="language-plaintext highlighter-rouge">metafunc.parametrize</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>testCases = zip(zip(outputs['cmdOuts'], outputs['srcsums']), destsums['destsums'], destsums['cmdOuts'])
+metafunc.parametrize("cmdOut, destsums, destderrs", testCases, ids=outputs[‘IDs’])
+</code></pre></div></div>
+<p>Here, we grouped the <code class="language-plaintext highlighter-rouge">srcsum</code> into <code class="language-plaintext highlighter-rouge">cmdOut</code> with the returncode, stdout and stderr. NOTE: Any form of grouping is purely up to stylistic preference. <br />
+Now that the data for the test is set up, we can write the test class and test function.</p>
+
+<h2 id="writing-a-test-function">Writing a test function:</h2>
+<p>In this framework, convention is to group the test functions into test classes, based on the functionality (i.e. action) type being tested.</p>
+
+<p>In the same test file, add imports for the necessary modules at the top of the file:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sys.path.insert(0, "../TestClasses")
+from BaseTest import BaseTest
+from ReadWriteTest import ReadWriteTest
+import pytest
+import asyncio
+</code></pre></div></div>
+
+<p>Next, define the test class and within it, the test function.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Test_Copy:
+	def test_copy(self):
+</code></pre></div></div>
+<p>When parametrizing the test, we passed the arguments:
+<code class="language-plaintext highlighter-rouge">metafunc.parametrize("cmdOut, destsums, destderrs", testCases, ids=outputs[‘IDs’])</code></p>
+
+<p>Pass these same arguments to the test_copy function:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	def test_copy(self, cmdOut, destsum, destderr):
+        (returncode, stdout, stderr), srcsum = cmdOut
+</code></pre></div></div>
+<p>We also unpacked the <code class="language-plaintext highlighter-rouge">cmdOut</code> argument to get the individual <code class="language-plaintext highlighter-rouge">returncode, stdout, stderr</code> and <code class="language-plaintext highlighter-rouge">srcsum</code> values for the scenario.</p>
+
+<p>Now we can add the assert statements. For the copy test to pass, the copy command’s returncode should == 0, and the srcsum and destsum should match:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>		assert returncode == 0, f"Upload Failed: {stdout}, {stderr}"
+        assert srcsum == destsum, f"Stat failed: Source: {srcsum}, Dest: {destsum} Error: {destderr}"
+</code></pre></div></div>
+
+<p> </p>
+
+<p>The full file should look like this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sys.path.insert(0, "../TestClasses")
+from BaseTest import BaseTest
+from ReadWriteTest import ReadWriteTest
+import pytest
+import asyncio
+
+class Test_Copy:
+	def test_copy(self, cmdOut, destsum, destderr):
+        (returncode, stdout, stderr), srcsum = cmdOut
+		assert returncode == 0, f"Upload Failed: {stdout}, {stderr}"
+        assert srcsum == destsum, f"Stat failed: Source: {srcsum}, Dest: {destsum} Error: {destderr}"
+
+```Test setup:```
+def pytest_generate_tests(metafunc):
+	class_name = metafunc.cls.__name__
+	test_name = metafunc.function.__name__
+	loop = asyncio.get_event_loop()
+	RWTest = ReadWriteTest(configFile=ConfigReadWrite.yaml)
+	if class_name == "Test_Copy":
+        if test_name == "test_copy":
+			FILENAME = 'tst.txt'
+			outputs = loop.run_until_complete(RWTest.genScenarios('copy', sourcePath=f'../TestData/{FILENAME}', 
+						xrdArgs='--force', gfalArgs='--force'))
+
+			destsums = loop.run_until_complete(RWTest.genScenarios('checksum', destinBaseNm=FILENAME))
+
+			testCases = zip(zip(outputs['cmdOuts'], outputs['srcsums']), 
+						destsums['destsums'], destsums['cmdOuts'])
+
+			metafunc.parametrize("cmdOut, destsums, destderrs", testCases, ids=outputs[‘IDs’])
+</code></pre></div></div>
+
+<p>The test can now be run in the command line:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ pytest test_readwrite.py
+</code></pre></div></div>
+
+<p>The output will look like this: <br />
+<img src="/xrootd-testing-framework/assets/css/images/image-1.png" alt="alt text" /></p>
+
+<p>We can also use the allure module to generate a more detailed report that can be shared. <a href="https://allurereport.org/docs/pytest/">See more about allure reports in pytest here</a>. <br />
+When running the test file in the command line, use the flag <code class="language-plaintext highlighter-rouge">--alluredir</code> and specify a directory to store the results, then pass that directory to <code class="language-plaintext highlighter-rouge">allure serve</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ pytest --alluredir=../Results test_readwrite.py
+$ allure serve ../Results
+</code></pre></div></div>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/xrootd-testing-framework/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">XRootD Testing Framework Documentation</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">XRootD Testing Framework Documentation</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Documentation for the XRootD testing framework for pre-deployed endpoints</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

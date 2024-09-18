@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Example 4 – TPCTest: Deletion (Performance) Test | XRootD Testing Framework Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Example 4 – TPCTest: Deletion (Performance) Test" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<meta property="og:description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<link rel="canonical" href="http://localhost:4000/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/" />
+<meta property="og:url" content="http://localhost:4000/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/" />
+<meta property="og:site_name" content="XRootD Testing Framework Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Example 4 – TPCTest: Deletion (Performance) Test" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Documentation for the XRootD testing framework for pre-deployed endpoints","headline":"Example 4 – TPCTest: Deletion (Performance) Test","url":"http://localhost:4000/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/xrootd-testing-framework/feed.xml" title="XRootD Testing Framework Documentation" /></head>
+<body><header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" rel="author" href="/xrootd-testing-framework/">XRootD Testing Framework Documentation</a>
+        <nav>
+            <ul class="site-nav">
+                <li><a href="/xrootd-testing-framework/">Home</a></li>
+                <li><a href="/xrootd-testing-framework/installation/">Installation</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/classes_and_methods/">Classes and Methods</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/BaseTest/">BaseTest</a></li>
+                        <li><a href="/xrootd-testing-framework/ReadWriteTest/">ReadWriteTest</a></li>
+                        <li><a href="/xrootd-testing-framework/MetadataTest/">MetadataTest</a></li>
+                        <li><a href="/xrootd-testing-framework/TPCTest/">TPCTest</a></li>
+
+                    </ul>
+                </li>
+                
+                <li><a href="/xrootd-testing-framework/config_file_structure/">Config File Setup</a></li>
+                <li><a href="/xrootd-testing-framework/setup_test_tutorial/">How To Setup A Test</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/examples/">Examples Of Tests</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/example_1_readwritetest_token_test/">Example 1 - ReadWriteTest: Token Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_2_readwritetest_vector_read_test/">Example 2 - ReadWriteTest: Vector Read</a></li>
+                        <li><a href="/xrootd-testing-framework/example_3_tpctest_copy_test/">Example 3 - TPCTest: Copy Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/">Example 4 - TPCTest: Deletion (Performance) Test</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/css/style.css">
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Example 4 – TPCTest: Deletion (Performance) Test</h1>
+  </header>
+
+  <div class="post-content">
+    <h2 id="tpdeletion-test-setup">TPDeletion Test Setup:</h2>
+<p>This test setup uses the method <code class="language-plaintext highlighter-rouge">genTimedScenarios</code> to transfer a file from site A to site B, and then back. 
+This method generates the commands, then runs each command (default: 3) times.</p>
+<blockquote>
+  <p><strong>NOTE:</strong> The TPCTest object will automatically transfer a local file to site A when using <code class="language-plaintext highlighter-rouge">action='copy'</code></p>
+</blockquote>
+
+<p>Next, <code class="language-plaintext highlighter-rouge">genTimedScenarios</code> is used to delete the files from the destination, which is once again performed in triplicate, and timed. The outputs and average times are obtained.<br />
+Finally, <code class="language-plaintext highlighter-rouge">genTimedScenarios</code> is used to checksum each deleted file on the two sites. The average time for the deletions is stored in the <code class="language-plaintext highlighter-rouge">outputs[‘cmdOuts’]</code> key.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def pytest_generate_tests(metafunc):
+    loop = asyncio.get_event_loop()
+    RWTest = ReadWriteTest(configFile="../TestClasses/ConfigReadWrite.yaml")
+    TPC = TPCopyTest(configFile='../TestClasses/ConfigTPC.yaml')
+    test_name = metafunc.function.__name__
+    class_name = metafunc.cls.__name__
+</code></pre></div></div>
+<p>[sic]</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    elif class_name == 'Test_TPDeletion_Performance':
+        if test_name == 'test_40MB':
+            FILENAME = 'tst40M.txt'
+
+            loop.run_until_complete(TPC.genScenarios('copy', sourcePath=f"../TestData/{FILENAME}", 
+                                    sourceBaseNm=FILENAME, destinBaseNm=FILENAME, 
+                                    xrdArgs=f'--force', gfalArgs='--force', timeout=10))
+
+            outputs = loop.run_until_complete(TPC.genTimedScenarios('delete', 
+                                    sourcePath=f"../TestData/{FILENAME}", 
+                                    sourceBaseNm=FILENAME, destinBaseNm=FILENAME))           
+
+            destsums = loop.run_until_complete(TPC.genScenarios('checksum', sourceBaseNm=FILENAME, 
+                                    destinBaseNm=FILENAME))
+            
+            testCases = zip(outputs['cmdOuts'], destsums['destsums'], destsums['cmdOuts'])
+            ids = outputs['IDs']
+            metafunc.parametrize("cmdOuts, destsums, destderrs", testCases, ids=ids)
+
+</code></pre></div></div>
+
+<h2 id="tpdeletion-test-function">TPDeletion Test Function:</h2>
+<p>This example test checks that the average deletion time is under a target time. The target time is calculated by dividing the file size in MB by the target rate(s) in MB/s. <br />
+A buffer of 2 seconds is used to account for the time taken to establish and close the network connection.</p>
+
+<p>For each output in the pair: <br />
+If the deletion’s returncode is 0, the destsums cannot be found due to a missing file, and the average time is below the target maximum time, then the test will pass.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Test_Deletion_Performance:
+    BUFFER = 2 #seconds
+    # UK Sites: 60 MB/s target, Non-UK 120 MB/s
+    def test_40MB(self, cmdOuts, destsums, destderrs):
+        UKtarget = (40 / 60) + BUFFER #seconds
+        NonUKtarget = (40 / 120) + BUFFER
+
+        for i in range(len(cmdOuts)):
+            returncode, stdout, stderr, avgTime = cmdOuts[i]
+            destsum, destderr = destsums[i], destderrs[i]
+            throughput = 40 / avgTime 
+            assert returncode == 0; f"Deletion failed: {stderr}, {stdout}"
+            assert destsum == None and "file not found" in destderr.casefold(), f"Deletion failed: Destsum: {destsum} Error: {destderr}"
+
+            assert avgTime &lt;= NonUKtarget; f"Throughput rate {throughput} MB/s did not reach target rate: {NonUKtarget}/ 120 MB/s"
+            assert avgTime &lt;= UKtarget; f"Throughput rate {throughput} MB/s did not reach target rate: {UKtarget}/ 60 MB/s"
+</code></pre></div></div>
+
+<h2 id="result">Result:</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ pytest test_performance.py::Test_TPDeletion_Performance -v
+</code></pre></div></div>
+<p><img src="/xrootd-testing-framework/assets/css/images/image-6.png" alt="alt text" /></p>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/xrootd-testing-framework/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">XRootD Testing Framework Documentation</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">XRootD Testing Framework Documentation</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Documentation for the XRootD testing framework for pre-deployed endpoints</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

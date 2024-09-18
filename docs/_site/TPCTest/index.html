@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>TPCTest | XRootD Testing Framework Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="TPCTest" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<meta property="og:description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<link rel="canonical" href="http://localhost:4000/xrootd-testing-framework/TPCTest/" />
+<meta property="og:url" content="http://localhost:4000/xrootd-testing-framework/TPCTest/" />
+<meta property="og:site_name" content="XRootD Testing Framework Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="TPCTest" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Documentation for the XRootD testing framework for pre-deployed endpoints","headline":"TPCTest","url":"http://localhost:4000/xrootd-testing-framework/TPCTest/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/xrootd-testing-framework/feed.xml" title="XRootD Testing Framework Documentation" /></head>
+<body><header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" rel="author" href="/xrootd-testing-framework/">XRootD Testing Framework Documentation</a>
+        <nav>
+            <ul class="site-nav">
+                <li><a href="/xrootd-testing-framework/">Home</a></li>
+                <li><a href="/xrootd-testing-framework/installation/">Installation</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/classes_and_methods/">Classes and Methods</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/BaseTest/">BaseTest</a></li>
+                        <li><a href="/xrootd-testing-framework/ReadWriteTest/">ReadWriteTest</a></li>
+                        <li><a href="/xrootd-testing-framework/MetadataTest/">MetadataTest</a></li>
+                        <li><a href="/xrootd-testing-framework/TPCTest/">TPCTest</a></li>
+
+                    </ul>
+                </li>
+                
+                <li><a href="/xrootd-testing-framework/config_file_structure/">Config File Setup</a></li>
+                <li><a href="/xrootd-testing-framework/setup_test_tutorial/">How To Setup A Test</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/examples/">Examples Of Tests</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/example_1_readwritetest_token_test/">Example 1 - ReadWriteTest: Token Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_2_readwritetest_vector_read_test/">Example 2 - ReadWriteTest: Vector Read</a></li>
+                        <li><a href="/xrootd-testing-framework/example_3_tpctest_copy_test/">Example 3 - TPCTest: Copy Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/">Example 4 - TPCTest: Deletion (Performance) Test</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/css/style.css">
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">TPCTest</h1>
+  </header>
+
+  <div class="post-content">
+    <h2 id="tpctest-class">TPCTest Class:</h2>
+<p>The TPCTest class inherits from BaseTest class, and contains the main methods to create and run the test commands.</p>
+
+<p><em>class</em> <strong>TPCTest( <em>configFile</em></strong>=None, <strong><em>createFiles</em></strong>=False, <strong><em>root</em></strong>=True, <strong><em>https</em></strong>=True, <strong><em>davs</em></strong>=True <strong>)</strong></p>
+
+<p>A configuration file can be passed upon instantiation of the subclasses containing the endpoint, file path and optional port.</p>
+
+<p>Optionally, specifying a directory, file name(s) and file size(s) in the config file and instantiating with createFiles=True will generate these files in the provided directory.</p>
+
+<p>To exclude up to two of the protocols from being used, they can be toggled to False when instantiating the subclass</p>
+
+<p> </p>
+
+<h3 id="tpctest-methods">TPCTest Methods:</h3>
+<hr />
+
+<p><em>method</em> <strong>genScenarios( <em>action</em></strong>, <strong><em>sourcePath</em></strong>=None, <strong><em>sourceBaseNm</em></strong>=None, <strong><em>destinBaseNm</em></strong>=None, <strong><em>xrdArgs</em></strong>=None, <strong><em>gfalArgs</em></strong>=None, <strong><em>timeout</em></strong>=None, <strong><em>XROOTD_ECHO</em></strong>=False, <strong><em>INT_MANAGER</em></strong>=False <strong>)</strong></p>
+
+<p>This method generates and runs commands for a given functionality, for each protocol and endpoint combination. <br />
+These functionalities are performed on endpoint A and endpoint B, therefore the commands and their outputs are treated as pairs.</p>
+
+<p>     <strong>Parameters:</strong></p>
+<ul>
+  <li><strong>action</strong> (<em>string</em>) – Functionality of the command. Expects a string of one of the following:
+    <ul>
+      <li><em>copy</em> – copy a single file</li>
+      <li><em>checksum</em> – get checksum of one or more destination files</li>
+      <li><em>delete</em> – delete a single destination file</li>
+    </ul>
+  </li>
+  <li><strong>sourcePath</strong> (<em>string</em>) – Path to local file. Used to transfer local file to source endpoint</li>
+  <li><strong>sourceBaseNm</strong> (<em>string</em>) – Base name of file on source endpoint.</li>
+  <li><strong>destinBaseNm</strong> (<em>string</em>) – Base name of file on destination endpoint.</li>
+  <li><strong>xrdArgs</strong> (<em>string, optional</em>) – Extra flag(s) to be added to the generated base command of the action, for XRootD commands</li>
+  <li><strong>gfalArgs</strong> (<em>string, optional</em>) - Extra flag(s) to be added to the generated base command of the action, for gfal2 commands</li>
+  <li><strong>TestAll</strong> (<em>bool, optional</em>) – If set to True, will run commands using all sites under <code class="language-plaintext highlighter-rouge">TEST_ENDPOINTS</code> in config file (i.e. all ‘Site A’s)</li>
+  <li><strong>timeout</strong> (<em>int, optional</em>) – Optional timeout for all commands, overrides default (5 seconds)</li>
+  <li><strong>XROOTD_ECHO</strong> (<em>bool, optional</em>) – Sets endpoint to redirector: <code class="language-plaintext highlighter-rouge">xrootd.echo.stfc.ac.uk</code></li>
+  <li><strong>INT_MANAGER</strong> (<em>bool, optional</em>) – Sets endpoint to redirector: <code class="language-plaintext highlighter-rouge">echo-internal-manager01.gridpp.rl.ac.uk</code></li>
+</ul>
+
+<p>     <strong>Returns:</strong><br />
+         Returns a dictionary containing the command outputs required by the given action. <br />
+         The commands in TPCTest are generated and run as pairs, so the outputs are also in pairs. <br />
+         All actions will return a dictionary containing the following key:value pairs:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">‘cmdOuts’: [((returncodeAB, stdoutAB, stderrAB), (returncodeBA, stdoutBA, stderrBA)), … ((returncodeAB, stdoutAB, stderrAB), (returncodeBA, stdoutBA, stderrBA))]</code> – Returncode, stdout and stderr in pairs of tuples for each command pair that was run</li>
+  <li><code class="language-plaintext highlighter-rouge">‘IDs’: [‘example_ID1’, … ‘example_IDx’]</code> – ID for each command/scenario in the format ‘protocol:sourceEndpoint-destinationEndpoint-file’</li>
+</ul>
+
+<p>         Additionally, the following actions will also contain extra key:value outputs:</p>
+
+<p>         <em>Checksum</em>:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">‘cmdOuts’: [(stderrAB, stderrBA), … (stderrAB, stderrBA)]</code> – Standard errors (without returncode and stdout) for each command pair that was run.</li>
+  <li><code class="language-plaintext highlighter-rouge">‘destsums’: [(checksumAB, checksumBA), … (checksumAB, checksumBA)]</code> – Checksums for files on both sites in pairs.</li>
+</ul>
+
+<p>     <strong>Return type:</strong> <br />
+         dictionary</p>
+
+<hr />
+
+<p><em>method</em> <strong>genTimedScenarios( <em>action</em></strong>, <strong><em>sourcePath</em></strong>=None, <strong><em>destinBaseNm</em></strong>=None, <strong><em>xrdArgs</em></strong>=None, <strong><em>gfalArgs</em></strong>=None, <strong><em>reps</em></strong>=3, <strong><em>timeout</em></strong>=None, <strong><em>XROOTD_ECHO</em></strong>=False, <strong><em>INT_MANAGER</em></strong>=False <strong>)</strong></p>
+
+<p>This method generates and runs commands for a given functionality, for each protocol and endpoint combination.<br />
+These functionalities are performed on endpoint A and endpoint B, therefore the commands and their outputs are treated as pairs. <br />
+Each command pair is run for several repetitions (reps) and timed. An average of the time is returned with the output.</p>
+
+<p>     <strong>Parameters:</strong></p>
+<ul>
+  <li><strong>action</strong> (<em>string</em>) – Functionality of the command. Expects a string of one of the following:
+    <ul>
+      <li><em>copy</em> – copy a single file</li>
+      <li><em>checksum</em> – get checksum of one or more destination files</li>
+      <li><em>delete</em> – delete a single destination file</li>
+    </ul>
+  </li>
+  <li><strong>sourcePath</strong> (<em>string</em>) – Path to local file. Used to transfer local file to source endpoint</li>
+  <li><strong>sourceBaseNm</strong> (<em>string</em>) – Base name of file on source endpoint.</li>
+  <li><strong>destinBaseNm</strong> (<em>string</em>) – Base name of file on destination endpoint.</li>
+  <li><strong>xrdArgs</strong> (<em>string, optional</em>) – Extra flag(s) to be added to the generated base command of the action, for XRootD commands</li>
+  <li><strong>gfalArgs</strong> (<em>string, optional</em>) - Extra flag(s) to be added to the generated base command of the action, for gfal2 commands</li>
+  <li><strong>reps</strong> (<em>int, optional</em>) – Set number of repetitions for each command to run, overrides default (3)</li>
+  <li><strong>timeout</strong> (<em>int, optional</em>) – Optional timeout for all commands, overrides default (5 seconds)</li>
+  <li><strong>XROOTD_ECHO</strong> (<em>bool, optional</em>) – Sets endpoint to redirector: <code class="language-plaintext highlighter-rouge">xrootd.echo.stfc.ac.uk</code></li>
+  <li><strong>INT_MANAGER</strong> (<em>bool, optional</em>) – Sets endpoint to redirector: <code class="language-plaintext highlighter-rouge">echo-internal-manager01.gridpp.rl.ac.uk</code></li>
+</ul>
+
+<p>     <strong>Returns:</strong><br />
+         Returns a dictionary containing the command outputs required by the given action. <br />
+         The commands in TPCTest are generated and run as pairs, so the outputs are also in pairs. <br />
+         All actions will return a dictionary containing the following key:value pairs:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">‘cmdOuts’: [((returncodeAB, stdoutAB, stderrAB, avgTimeAB), (returncodeBA, stdoutBA, stderrBA, avgTimeBA)), … ((returncodeAB, stdoutAB, stderrAB, avgTimeAB), (returncodeBA, stdoutBA, stderrBA, avgTimeBA))]</code> – Returncode, stdout, stderr and avgTime in pairs of tuples for each command pair that was run</li>
+  <li><code class="language-plaintext highlighter-rouge">‘IDs’: [‘example_ID1’, … ‘example_IDx’]</code> – ID for each command/scenario in the format ‘protocol:sourceEndpoint-destinationEndpoint-file’</li>
+</ul>
+
+<p>         Additionally, the following actions will also contain extra key:value outputs:</p>
+
+<p>         <em>Checksum</em>:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">‘cmdOuts’: [(stderrAB, stderrBA), … (stderrAB, stderrBA)]</code> – Standard errors (without returncode and stdout) for each command pair that was run.</li>
+  <li><code class="language-plaintext highlighter-rouge">‘destsums’ = [(checksumAB, checksumBA), … (checksumAB, checksumBA)]</code> – Checksums for files on both sites in pairs.</li>
+</ul>
+
+<p>     <strong>Return type:</strong> <br />
+         dictionary</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/xrootd-testing-framework/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">XRootD Testing Framework Documentation</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">XRootD Testing Framework Documentation</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Documentation for the XRootD testing framework for pre-deployed endpoints</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

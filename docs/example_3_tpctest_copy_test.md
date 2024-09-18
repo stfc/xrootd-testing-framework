@@ -1,7 +1,10 @@
+# Example 3 – TPCTest: Copy Test
+
 ## TPCopy Test Setup:
-This test setup transfers a file from site A to site B, and then back. Then, the checksums of both files are obtained. \
+This test setup transfers a file from site A to site B, and then back. Then, the checksums of both files are obtained. 
 > **NOTE:** The TPCTest object will automatically transfer a local file to site A when using ```action='copy'``` 
-> 
+
+ 
 First, setup the ```pytest_generate_tests``` function:
 ~~~
 def pytest_generate_tests(metafunc):
@@ -46,4 +49,4 @@ Example of test cases where tests fail:
 ~~~
 $ pytest test_tpc.py::Test_TPCopy -v
 ~~~
-![alt text](image-5.png)
+![alt text]({{ site.baseurl }}/assets/css/images/image-5.png)

@@ -1,3 +1,5 @@
+# Example 4 – TPCTest: Deletion (Performance) Test
+
 ## TPDeletion Test Setup:
 This test setup uses the method ```genTimedScenarios``` to transfer a file from site A to site B, and then back. 
 This method generates the commands, then runs each command (default: 3) times.
@@ -67,4 +69,4 @@ class Test_Deletion_Performance:
 ~~~
 $ pytest test_performance.py::Test_TPDeletion_Performance -v
 ~~~
-![alt text](image-6.png)
+![alt text]({{ site.baseurl }}/assets/css/images/image-6.png)

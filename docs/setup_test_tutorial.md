@@ -1,3 +1,4 @@
+# How To Setup and Write A Test
 This section describes how to use the setup class *ReadWriteTest* to setup the data for the test, and how to write the test function itself.
 
 ## How To Setup A Test:
@@ -141,7 +142,7 @@ $ pytest test_readwrite.py
 ~~~
 
 The output will look like this: \
-![alt text](image-1.png)
+![alt text]({{ site.baseurl }}/assets/css/images/image-1.png)
 
 We can also use the allure module to generate a more detailed report that can be shared. [See more about allure reports in pytest here](https://allurereport.org/docs/pytest/). \
 When running the test file in the command line, use the flag ```--alluredir``` and specify a directory to store the results, then pass that directory to ```allure serve```:

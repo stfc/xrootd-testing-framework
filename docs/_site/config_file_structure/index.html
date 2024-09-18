@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Config File Structure | XRootD Testing Framework Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Config File Structure" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<meta property="og:description" content="Documentation for the XRootD testing framework for pre-deployed endpoints" />
+<link rel="canonical" href="http://localhost:4000/xrootd-testing-framework/config_file_structure/" />
+<meta property="og:url" content="http://localhost:4000/xrootd-testing-framework/config_file_structure/" />
+<meta property="og:site_name" content="XRootD Testing Framework Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Config File Structure" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Documentation for the XRootD testing framework for pre-deployed endpoints","headline":"Config File Structure","url":"http://localhost:4000/xrootd-testing-framework/config_file_structure/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/xrootd-testing-framework/feed.xml" title="XRootD Testing Framework Documentation" /></head>
+<body><header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" rel="author" href="/xrootd-testing-framework/">XRootD Testing Framework Documentation</a>
+        <nav>
+            <ul class="site-nav">
+                <li><a href="/xrootd-testing-framework/">Home</a></li>
+                <li><a href="/xrootd-testing-framework/installation/">Installation</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/classes_and_methods/">Classes and Methods</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/BaseTest/">BaseTest</a></li>
+                        <li><a href="/xrootd-testing-framework/ReadWriteTest/">ReadWriteTest</a></li>
+                        <li><a href="/xrootd-testing-framework/MetadataTest/">MetadataTest</a></li>
+                        <li><a href="/xrootd-testing-framework/TPCTest/">TPCTest</a></li>
+
+                    </ul>
+                </li>
+                
+                <li><a href="/xrootd-testing-framework/config_file_structure/">Config File Setup</a></li>
+                <li><a href="/xrootd-testing-framework/setup_test_tutorial/">How To Setup A Test</a></li>
+                <li class="dropdown">
+                    <a href="/xrootd-testing-framework/examples/">Examples Of Tests</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/xrootd-testing-framework/example_1_readwritetest_token_test/">Example 1 - ReadWriteTest: Token Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_2_readwritetest_vector_read_test/">Example 2 - ReadWriteTest: Vector Read</a></li>
+                        <li><a href="/xrootd-testing-framework/example_3_tpctest_copy_test/">Example 3 - TPCTest: Copy Test</a></li>
+                        <li><a href="/xrootd-testing-framework/example_4_tpctest_deletion_performance_test/">Example 4 - TPCTest: Deletion (Performance) Test</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<link rel="stylesheet" href="/xrootd-testing-framework/assets/css/style.css">
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Config File Structure</h1>
+  </header>
+
+  <div class="post-content">
+    <p>The configuration file is a .yaml file that can be used to specify endpoints, site paths and ports to the test object.</p>
+
+<p>It is also possible to pass a directory, filename and file size, which can be generated during test setup.</p>
+
+<p>A class-wide timeout can also be specified in the config file.</p>
+
+<h2 id="timeout">Timeout</h2>
+<p>To specify a timeout (in seconds), add <code class="language-plaintext highlighter-rouge">TIMEOUT:</code> to the config file followed by the number of seconds:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>TIMEOUT: 5
+</code></pre></div></div>
+<p> </p>
+<h2 id="file-generation">File Generation</h2>
+<p>To pass a directory and file generation information, the format is as follows:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DIRECTORY: ../TestData/bulkData/
+FILES:
+  - name: tst40M.txt 
+    size: 41943040 
+  - name: tst2K.txt
+    size: 1024*20
+</code></pre></div></div>
+<p>File size is in bytes. It can be given in integers, or as an operation</p>
+<blockquote>
+  <p><strong>NOTE:</strong> The directory passed must end in a slash ‘/’</p>
+</blockquote>
+
+<p> </p>
+<h2 id="adding-endpoints-site-paths-and-ports">Adding Endpoints, Site Paths and Ports:</h2>
+
+<blockquote>
+  <p><strong>NOTE:</strong> The site paths passed must end in a slash ‘/’</p>
+</blockquote>
+
+<h3 id="readwritetest-and-metadatatest-config-file">ReadWriteTest and MetadataTest Config File:</h3>
+<p>For config files used for ReadWriteTest and MetadataTest classes, the format to specify sites is as follows:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SITES: # Destintation SitesList
+  CEPH-SVC16:
+      - ceph-svc16.gridpp.rl.ac.uk
+      - dteam:/test/
+      - 1095
+  CEPH-SVC02:
+       - ceph-svc02.gridpp.rl.ac.uk
+       - dteam:/test/
+</code></pre></div></div>
+
+<p>Under <code class="language-plaintext highlighter-rouge">SITES:</code>, specify the host/server name in capitals. 
+Underneath it, pass the full endpoint, the site path (where the files will be transferred/deleted), and optionally, a port to use for this endpoint. If no port is specified, port <code class="language-plaintext highlighter-rouge">1094</code> will be used.</p>
+
+<blockquote>
+  <p>These hostnames will be used to generate the test IDs</p>
+</blockquote>
+
+<hr />
+
+<h3 id="tpctest-config-file">TPCTest Config File:</h3>
+<p>The sites in the TPCTest config file are divided into <code class="language-plaintext highlighter-rouge">TEST_ENDPOINT</code>, which will be site A, and <code class="language-plaintext highlighter-rouge">UK_SITE</code> and (optional) <code class="language-plaintext highlighter-rouge">NON_UK_SITE</code>, which are endpoints that will be tested against (i.e. site Bs). <br />
+Under these categories, specify the host/server name, full endpoint path, site path and port as above:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>TEST_ENDPOINT: # SiteA 
+    CEPH-SVC16:
+        - ceph-svc16.gridpp.rl.ac.uk
+        - dteam:/test/
+         - 1094
+
+UK_SITE: # SiteB
+    CEPH-SVC30:
+        - ceph-svc30.gridpp.rl.ac.uk
+        - dteam:/test/
+
+NON_UK_SITE: # SiteB
+    GOLIAS100: 
+        - golias100.farm.particle.cz
+        - dpm/farm.particle.cz/home/dteam/test/
+</code></pre></div></div>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/xrootd-testing-framework/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">XRootD Testing Framework Documentation</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">XRootD Testing Framework Documentation</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Documentation for the XRootD testing framework for pre-deployed endpoints</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
