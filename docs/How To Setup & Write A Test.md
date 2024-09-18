@@ -1,4 +1,3 @@
-# How To Setup and Write A Test
 This section describes how to use the setup class *ReadWriteTest* to setup the data for the test, and how to write the test function itself.
 
 ## How To Setup A Test:
