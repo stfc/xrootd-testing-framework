@@ -1,4 +1,3 @@
-## XRootD Testing Framework
 GitHub Repository: <https://github.com/stfc/xrootd-testing-framework/>
 
 ### What This Framework Is For:
