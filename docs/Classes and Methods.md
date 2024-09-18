@@ -30,8 +30,8 @@ Uses the xrdadler32 shell script to obtain an adler32 checksum of any single fil
 &nbsp;&nbsp;&nbsp;&nbsp; **Return type:**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String 
 
-&nbsp;
 ___
+
 _method_ **unsetCreds( _vomsProxy_**=None, **_bearerToken_**=None, **_x509User_**=None **)**
 
 Temporarily removes the VOMS proxy token file from the given directory and copies it to a temporary location, and un-sets the ```BEARER_TOKEN``` and ```X509_USER_PROXY``` environmental variables.
@@ -44,8 +44,8 @@ Temporarily removes the VOMS proxy token file from the given directory and copie
 &nbsp;&nbsp;&nbsp;&nbsp; **Returns:** \
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; None
 
-&nbsp;
 ___
+
 *method* **resetCreds( _vomsProxy_**=None, **_bearerToken_**=None, **_x509User_**=None **)**
 
 Restores the VOMS proxy token file to the given directory, and resets the ```BEARER_TOKEN``` and ```X509_USER_PROXY``` environmental variables with the given values.
@@ -58,8 +58,8 @@ Restores the VOMS proxy token file to the given directory, and resets the ```BEA
 &nbsp;&nbsp;&nbsp;&nbsp; **Returns:**\
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; None
 
-&nbsp;
 ___
+
 _method_ **cleanup()**
 
 Removes the files generated from the configuration file when the class was instantiated.
@@ -69,6 +69,8 @@ Removes the files generated from the configuration file when the class was insta
 
 &nbsp;&nbsp;&nbsp;&nbsp; **Returns:**\
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; None
+
+---
 
 &nbsp;
 ## ReadWriteTest Class:
@@ -82,8 +84,11 @@ Optionally, specifying a directory, file name(s) and file size(s) in the config 
 
 To exclude up to two of the protocols from being used, they can be toggled to False when instantiating the subclass
 
+&nbsp;
+
 ### ReadWriteTest Methods:
 ___
+
 _method_ **genScenarios( _action_**, **_sourcePath_**=None, **_destinBaseNm_**=None, **_xrdArgs_**=None, **_gfalArgs_**=None, **_timeout_**=None, **_XROOTD_ECHO_**=False, **_INT_MANAGER_**=False, ****_readvArgs_ )**
 
 This method generates and runs commands for a given functionality, for each protocol and endpoint combination
@@ -133,8 +138,8 @@ This method generates and runs commands for a given functionality, for each prot
 &nbsp;&nbsp;&nbsp;&nbsp; **Return type:**\
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dictionary
 
-&nbsp;
 ___
+
 _method_ **genTimedScenarios( _action_**, **_sourcePath_**=None, **_destinBaseNm_**=None, **_xrdArgs_**=None, **_gfalArgs_**=None, **_reps_**=3, **_timeout_**=None, **_XROOTD_ECHO_**=False, **_INT_MANAGER_**=False, ****_readvArgs_ )**
 
 This method generates and runs commands for a given functionality, for each protocol and endpoint combination. \
@@ -186,6 +191,7 @@ Each command is run for several repetitions (reps) and timed. An average of this
 &nbsp;&nbsp;&nbsp;&nbsp; **Return type:** \
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dictionary
 
+---
 
 &nbsp;
 ## MetadataTest Class:
@@ -247,6 +253,8 @@ This method generates and runs commands for a given functionality, for each prot
 &nbsp;&nbsp;&nbsp;&nbsp; **Return type:** \
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dictionary
 
+---
+
 &nbsp;
 ## TPCTest Class:
 The TPCTest class inherits from BaseTest class, and contains the main methods to create and run the test commands.
@@ -300,8 +308,8 @@ These functionalities are performed on endpoint A and endpoint B, therefore the 
 &nbsp;&nbsp;&nbsp;&nbsp; **Return type:** \
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dictionary
 
-&nbsp;
 ___
+
 _method_ **genTimedScenarios( _action_**, **_sourcePath_**=None, **_destinBaseNm_**=None, **_xrdArgs_**=None, **_gfalArgs_**=None, **_reps_**=3, **_timeout_**=None, **_XROOTD_ECHO_**=False, **_INT_MANAGER_**=False **)**
 
 This method generates and runs commands for a given functionality, for each protocol and endpoint combination.  
