@@ -1,5 +1,3 @@
-# Example 4 – TPCTest: Deletion (Performance) Test
-
 ## TPDeletion Test Setup:
 This test setup uses the method ```genTimedScenarios``` to transfer a file from site A to site B, and then back. 
 This method generates the commands, then runs each command (default: 3) times.
