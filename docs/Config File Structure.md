@@ -45,7 +45,8 @@ SITES: # Destintation SitesList
 Under ```SITES:```, specify the host/server name in capitals. 
 Underneath it, pass the full endpoint, the site path (where the files will be transferred/deleted), and optionally, a port to use for this endpoint. If no port is specified, port ```1094``` will be used.
 
-> These hostnames will be used to generate the test IDs
+> These hostnames will be used to generate the test IDs\
+
 ---
 
 
