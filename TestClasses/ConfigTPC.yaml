@@ -1,21 +1,24 @@
-TIMEOUT: 10
+TIMEOUT: 5
+
 
 TEST_ENDPOINT: # SiteA - site tested against UK and Non-UK sites
     CEPH-SVC16:
-        - ceph-svc16.gridpp.rl.ac.uk 
+        - ceph-svc16.gridpp.rl.ac.uk
         - dteam:/test/
+        # - 1094
 
 UK_SITE: # SiteB
-    # CEPH-SVC28:
-    #     - ceph-svc28.gridpp.rl.ac.uk
+    CEPH-SVC30:
+        - ceph-svc30.gridpp.rl.ac.uk
+        - dteam:/test/
+    # CEPH-C04: 
+    #     - ceph-c04.glasgow.ac.uk
     #     - dteam:/test/
-    CEPH-C04: 
-        - ceph-c04.glasgow.ac.uk
-        - dteam:/test/ 
+    #     - 1094
 
 NON_UK_SITE: # SiteB
     GOLIAS100: 
-        - se1.farm.particle.cz #golias100.farm.particle.cz - same site
+        - golias100.farm.particle.cz
         - dpm/farm.particle.cz/home/dteam/test/
     # DC2-GRID-64: 
     #     - dc2-grid-64.brunel.ac.uk
