@@ -1,14 +1,14 @@
 # XRootD Testing Framework
 GitHub Repository: <https://github.com/stfc/xrootd-testing-framework/>
 
-### What This Framework Is For:
+## What This Framework Is For:
 This framework is made to test XRootD functionalities and performance on pre-deployed endpoints. The purpose of these tests is to:
 * Check that basic XRootD functionality works with the endpoint’s setup and configuration
   
 * Benchmark the performance of file transfer and deletion
 
 
-### Overview of How It Works:
+## Overview of How It Works:
 The testing framework uses [Pytest](https://docs.pytest.org/en/7.1.x/contents.html) to parametrize and run the tests. Accessory classes are used to setup the data for the tests. The classes are organised into 3 types: **_ReadWriteTests_**, **_ThirdPartyCopyTests_** and **_MetadataTests_**, with attributes and methods specific to their type. 
 
 To set up a test, a test object is created from the relevant class. This object stores the endpoints that will be tested against, the port(s), and the protocol. The method **_genScenarios_** is used to setup _functional_ tests, by generating XRootD (or gfal2) commands for each combination of protocol and endpoint. 
