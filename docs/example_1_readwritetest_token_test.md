@@ -18,7 +18,9 @@ Add the token test's setup code:
     if class_name == "Test_Token":
         if test_name == "test_copy_without_token":
             FILENAME = 'tst.txt'
+~~~
 Use unsetCreds method to unset environmental variable for token and voms_proxy:
+~~~
             bearerToken = os.getenv("BEARER_TOKEN")
             x509User = os.getenv("X509_USER_PROXY")
             RWTest.unsetCreds('/tmp/x509up_*', bearerToken, x509User)
