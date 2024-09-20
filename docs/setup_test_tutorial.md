@@ -21,16 +21,16 @@ def pytest_generate_tests(metafunc):
 Then, we store the name of the test class and test function, initialise the asyncio event loop, and the appropriate test object: 
 ~~~
 def pytest_generate_tests(metafunc):
-	class_name = metafunc.cls.__name__
-	test_name = metafunc.function.__name__
-	loop = asyncio.get_event_loop()
-	RWTest = ReadWriteTest(configFile=ConfigReadWrite.yaml)
+    class_name = metafunc.cls.__name__
+    test_name = metafunc.function.__name__
+    loop = asyncio.get_event_loop()
+    RWTest = ReadWriteTest(configFile=ConfigReadWrite.yaml)
 ~~~
 
 Now, add an ‘if’ statement that ensures that the setup code runs before the test function is called. In this example, we will have a test class called ‘Test_Copy’, and the test function will be called ‘test_copy’:
 ~~~
-	if class_name == "Test_Copy":
-        if test_name == "test_copy":
+    if class_name == "Test_Copy":
+    if test_name == "test_copy":
 ~~~
 
 Time to write the setup code – Under ```if test_name == "test_copy":```, let’s store the test file name as a variable, use the genScenarios method to copy that file to the endpoints, and store the outputs:
@@ -82,21 +82,21 @@ import asyncio
 Next, define the test class and within it, the test function. 
 ~~~
 class Test_Copy:
-	def test_copy(self):
+    def test_copy(self):
 ~~~
 When parametrizing the test, we passed the arguments:
 ```metafunc.parametrize("cmdOut, destsums, destderrs", testCases, ids=outputs[‘IDs’])```
 
 Pass these same arguments to the test_copy function:
 ~~~
-	def test_copy(self, cmdOut, destsum, destderr):
+    def test_copy(self, cmdOut, destsum, destderr):
         (returncode, stdout, stderr), srcsum = cmdOut
 ~~~
 We also unpacked the ```cmdOut``` argument to get the individual ```returncode, stdout, stderr``` and ```srcsum``` values for the scenario.
 
 Now we can add the assert statements. For the copy test to pass, the copy command’s returncode should == 0, and the srcsum and destsum should match:
 ~~~
-		assert returncode == 0, f"Upload Failed: {stdout}, {stderr}"
+        assert returncode == 0, f"Upload Failed: {stdout}, {stderr}"
         assert srcsum == destsum, f"Stat failed: Source: {srcsum}, Dest: {destsum} Error: {destderr}"
 ~~~
 
@@ -111,29 +111,29 @@ import pytest
 import asyncio
 
 class Test_Copy:
-	def test_copy(self, cmdOut, destsum, destderr):
+    def test_copy(self, cmdOut, destsum, destderr):
         (returncode, stdout, stderr), srcsum = cmdOut
-		assert returncode == 0, f"Upload Failed: {stdout}, {stderr}"
+        assert returncode == 0, f"Upload Failed: {stdout}, {stderr}"
         assert srcsum == destsum, f"Stat failed: Source: {srcsum}, Dest: {destsum} Error: {destderr}"
 
 ```Test setup:```
 def pytest_generate_tests(metafunc):
-	class_name = metafunc.cls.__name__
-	test_name = metafunc.function.__name__
-	loop = asyncio.get_event_loop()
-	RWTest = ReadWriteTest(configFile=ConfigReadWrite.yaml)
-	if class_name == "Test_Copy":
-        if test_name == "test_copy":
-			FILENAME = 'tst.txt'
-			outputs = loop.run_until_complete(RWTest.genScenarios('copy', sourcePath=f'../TestData/{FILENAME}', 
-						xrdArgs='--force', gfalArgs='--force'))
+    class_name = metafunc.cls.__name__
+    test_name = metafunc.function.__name__
+    loop = asyncio.get_event_loop()
+    RWTest = ReadWriteTest(configFile=ConfigReadWrite.yaml)
+    if class_name == "Test_Copy":
+    if test_name == "test_copy":
+        FILENAME = 'tst.txt'
+        outputs = loop.run_until_complete(RWTest.genScenarios('copy', sourcePath=f'../TestData/{FILENAME}', 
+			xrdArgs='--force', gfalArgs='--force'))
 
-			destsums = loop.run_until_complete(RWTest.genScenarios('checksum', destinBaseNm=FILENAME))
+	destsums = loop.run_until_complete(RWTest.genScenarios('checksum', destinBaseNm=FILENAME))
 
-			testCases = zip(zip(outputs['cmdOuts'], outputs['srcsums']), 
-						destsums['destsums'], destsums['cmdOuts'])
+	testCases = zip(zip(outputs['cmdOuts'], outputs['srcsums']), 
+			destsums['destsums'], destsums['cmdOuts'])
 
-			metafunc.parametrize("cmdOut, destsums, destderrs", testCases, ids=outputs[‘IDs’])
+	metafunc.parametrize("cmdOut, destsums, destderrs", testCases, ids=outputs[‘IDs’])
 ~~~
 
 The test can now be run in the command line:
