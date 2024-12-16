@@ -1,4 +1,5 @@
 DIRECTORY: ../TestData/bulkData/
+TIEMOUT: 15
 FILES:
   - name: tst40M.txt 
     size: 41943040 # File size in bytes
@@ -6,8 +7,8 @@ FILES:
     size: 1024*20
 
 SITES: # Destintation SitesList
-  CEPH-SVC16:
-      - ceph-svc16.gridpp.rl.ac.uk
+  CEPH-SVC01:
+      - ceph-svc01.gridpp.rl.ac.uk
       - dteam:/test/
       - 1094
   # CEPH-SVC02:

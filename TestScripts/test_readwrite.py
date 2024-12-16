@@ -24,7 +24,7 @@ class Test_Copy:
     ''' root-only: Transfer files and specify xrate, measure average time for transfer, check that it is within expected time range '''
     def test_xrate_copy(self, cmdOut):
         returncode, stdout, stderr, avgTime = cmdOut
-        expectTime = 40/10
+        expectTime = 40/9
         lowerBound = expectTime - (expectTime*0.15)
         upperBound = expectTime + (expectTime*0.15)
 

@@ -3,5 +3,7 @@ install
 memory_profiler
 upgrade
 TestScripts/__pycache__
+TestClasses/__pycache__
+TestClasses/__pycache__/*
 TestScripts/.pytest_cache
 Results
